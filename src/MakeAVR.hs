@@ -7,7 +7,6 @@ import Data.Maybe (fromMaybe)
 import System.Hardware.Serialport
 import Control.Applicative
 import Control.Concurrent
-import Control.Monad
 
 ccflags =
     [ "-c"
@@ -104,13 +103,13 @@ buildDir = "_build"
 getMCU = do
     mcu <- getConfig "MCU"
     board <- getConfig "BOARD"
-    return $ fromMaybe (error "don't know ow to determine MCU") $ mcu <|> join (fmap f board)
+    return $ fromMaybe (error "don't know how to determine MCU") $ mcu <|> (f =<< board)
     where f = fmap fst . flip lookup boards
 
 getF_CPU = do
     freq <- getConfig "F_CPU"
     board <- getConfig "BOARD"
-    return $ fromMaybe 16e6 $ fmap read freq <|> join (fmap f board)
+    return $ fromMaybe 16e6 $ fmap read freq <|> (f =<< board)
     where f = fmap snd . flip lookup boards
 
 getProgrammer = fmap (fromMaybe "avrispmk2") $ getConfig "PROGRAMMER"
