@@ -42,7 +42,8 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         mcu <- getMCU
         let os = [ buildDir </> c -<.> "o" | c <- cs ]
         need os
-        cmd "avr-g++" ldflags ("-mmcu=" ++ mcu) "-o" [ out ] os
+        () <- cmd "avr-g++" ldflags ("-mmcu=" ++ mcu) "-o" [ out ] os
+        cmd "avr-size" ("--mcu=" ++ mcu)  "--format=avr" [ out ]
 
     buildDir </> "image" <.> "hex" %> \out -> do
         let elf = out -<.> ".elf"
@@ -52,10 +53,9 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        Stdout res <- cmd "avr-objdump" "-S" [ elf ]
-        writeFile' out res
+        cmd (FileStdout out) "avr-objdump" "-S" [ elf ]
 
-    buildDir </> "//*.o" %> \out -> do
+    buildDir <//> "*.o" %> \out -> do
         let c = dropDirectory1 $ out -<.> "cpp"
             m = out -<.> "m"
         mcu <- getMCU
