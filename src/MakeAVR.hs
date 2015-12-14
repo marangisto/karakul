@@ -7,6 +7,7 @@ import Data.Maybe (fromMaybe)
 import System.Hardware.Serialport
 import Control.Applicative
 import Control.Concurrent
+import Data.List (isPrefixOf)
 
 ccflags =
     [ "-c"
@@ -27,6 +28,9 @@ ldflags =
     , "-Wl,--gc-sections"
     ]
 
+filterGarbageFiles :: [FilePath] -> [FilePath]
+filterGarbageFiles = filter $ \p -> not $ any (`isPrefixOf` takeFileName p) ["#", ".#"]
+
 main :: IO ()
 main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     usingConfigFile "build.mk"
@@ -38,8 +42,8 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         removeFilesAfter buildDir [ "//*" ]
 
     buildDir </> "image" <.> "elf" %> \out -> do
-        cs <- getDirectoryFiles "" [ "//*.c" ]
-        cpps <- getDirectoryFiles "" [ "//*.cpp" ]
+        cs <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.c" ]
+        cpps <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.cpp" ]
         mcu <- getMCU
         let objs = [ buildDir </> c <.> "o" | c <- cs ++ cpps ]
         need objs
