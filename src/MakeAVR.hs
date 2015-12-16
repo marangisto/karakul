@@ -7,6 +7,7 @@ import Data.Maybe (fromMaybe)
 import System.Hardware.Serialport
 import Control.Applicative
 import Control.Concurrent
+import Data.List (isPrefixOf)
 
 ccflags =
     [ "-c"
@@ -27,6 +28,9 @@ ldflags =
     , "-Wl,--gc-sections"
     ]
 
+filterGarbageFiles :: [FilePath] -> [FilePath]
+filterGarbageFiles = filter $ \p -> not $ any (`isPrefixOf` takeFileName p) ["#", ".#"]
+
 main :: IO ()
 main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     usingConfigFile "build.mk"
@@ -38,11 +42,13 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         removeFilesAfter buildDir [ "//*" ]
 
     buildDir </> "image" <.> "elf" %> \out -> do
-        cs <- getDirectoryFiles "" [ "//*.c", "//*.cpp" ]
+        cs <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.c" ]
+        cpps <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.cpp" ]
         mcu <- getMCU
-        let os = [ buildDir </> c -<.> "o" | c <- cs ]
-        need os
-        () <- cmd "avr-g++" ldflags ("-mmcu=" ++ mcu) "-o" [ out ] os
+        let objs = [ buildDir </> c <.> "o" | c <- cs ++ cpps ]
+        need objs
+        let linker = if null cpps then "avr-gcc" else "avr-g++"
+        () <- cmd linker ldflags ("-mmcu=" ++ mcu) "-o" [ out ] objs
         cmd "avr-size" ("--mcu=" ++ mcu)  "--format=avr" [ out ]
 
     buildDir </> "image" <.> "hex" %> \out -> do
@@ -55,16 +61,19 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         need [ elf ]
         cmd (FileStdout out) "avr-objdump" "-S" [ elf ]
 
-    buildDir <//> "*.o" %> \out -> do
-        let c = dropDirectory1 $ out -<.> "cpp"
+    let compile compiler out = do
+        let src = dropExtension . dropDirectory1 $ out
             m = out -<.> "m"
         mcu <- getMCU
         freq <- getF_CPU
         putNormal $ "MCU=" ++ mcu ++ ", F_CPU=" ++ show freq
-        () <- cmd "avr-g++" ccflags
+        () <- cmd compiler ccflags
             ("-mmcu=" ++ mcu) ("-DF_CPU=" ++ show (round freq) ++ "L")
-            [ c ] "-o" [ out ] "-MMD -MF" [ m ]
+            [ src ] "-o" [ out ] "-MMD -MF" [ m ]
         needMakefileDependencies m
+
+    buildDir <//> "*.c.o" %> compile "avr-gcc"
+    buildDir <//> "*.cpp.o" %> compile "avr-g++"
 
     phony "upload" $ do
         let hex = buildDir </> "image" <.> "hex"
