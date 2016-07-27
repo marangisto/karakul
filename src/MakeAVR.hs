@@ -8,6 +8,7 @@ import System.Hardware.Serialport
 import Control.Applicative
 import Control.Concurrent
 import Data.List (isPrefixOf)
+import USBSerial
 
 ccflags =
     [ "-c"
@@ -99,6 +100,8 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
                 [ "-c" ++ "usbtiny", "-p" ++ mcu, "-D" ]
                 ("-Uflash:w:" ++ hex ++ ":i")
             Just b -> error $ "don't know how to program BOARD: " ++ b
+
+    phony "ports" $ liftIO $ usbSerials Nothing Nothing >>= mapM_ print
 
 leonardoBootPort :: FilePath -> IO FilePath
 leonardoBootPort port = do
