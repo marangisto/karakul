@@ -3,11 +3,12 @@ import Development.Shake.Command
 import Development.Shake.FilePath
 import Development.Shake.Config
 import Development.Shake.Util
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, listToMaybe)
+import Data.List (isPrefixOf)
 import System.Hardware.Serialport
 import Control.Applicative
 import Control.Concurrent
-import Data.List (isPrefixOf)
+import Control.Monad
 import USBSerial
 
 ccflags =
@@ -80,18 +81,19 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         let hex = buildDir </> "image" <.> "hex"
         need [ hex ]
         mcu <- getMCU
-        port <- fmap (fromMaybe "COM3") $ getConfig "PORT"
         board <- getConfig "BOARD"
         case board of
             Nothing -> cmd "atprogram"
                 [ "-t", "avrispmk2", "-d", mcu, "-i", "isp" ]
                 [ "program", "-c", "--verify", "-f", hex ]
-            Just "uno" -> cmd "avrdude"
-                [ "-c" ++ "arduino", "-p" ++ mcu, "-P" ++ port ]
-                [ "-b" ++ "115200", "-D" ]
-                ("-Uflash:w:" ++ hex ++ ":i")
+            Just "uno" -> do
+                port <- unoPort
+                cmd "avrdude"
+                    [ "-c" ++ "arduino", "-p" ++ mcu, "-P" ++ port ]
+                    [ "-b" ++ "115200", "-D" ]
+                    ("-Uflash:w:" ++ hex ++ ":i")
             Just "leonardo" -> do
-                port <- liftIO $ leonardoBootPort port
+                port <- leonardoBootPort
                 cmd "avrdude"
                     [ "-c" ++ "avr109", "-p" ++ mcu, "-P" ++ port ]
                     [ "-b" ++ "57600", "-D" ]
@@ -103,12 +105,26 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
 
     phony "ports" $ liftIO $ usbSerials Nothing Nothing >>= mapM_ print
 
-leonardoBootPort :: FilePath -> IO FilePath
-leonardoBootPort port = do
-    putStrLn $ "resetting " ++ port
-    closeSerial =<<  openSerial port defaultSerialSettings { commSpeed = CS1200 }
-    threadDelay 4000000 -- FIXME: wait for device change
-    return "COM4" -- FIXME: look at device changes
+unoPort :: Action FilePath
+unoPort = do
+   port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x43
+   fmap (fromMaybe port) $ getConfig "PORT"
+
+leonardoBootPort :: Action FilePath
+leonardoBootPort = do
+    b <- fmap (fromMaybe False . fmap read) $ getConfig "MANUAL_BOOT"
+    when b $ do
+        port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x8036
+        port <- fmap (fromMaybe port) $ getConfig "PORT"
+        liftIO $ putStrLn $ "resetting " ++ port
+        liftIO $ closeSerial =<< openSerial port defaultSerialSettings { commSpeed = CS1200 }
+        liftIO $ threadDelay 4000000 -- FIXME: wait for device change
+    port <- fmap (fromMaybe "COM4") $ liftIO $ findPort 0x2341 0x36
+    bootPort <- getConfig "BOOT_PORT"
+    return $ fromMaybe port bootPort
+
+findPort :: Int -> Int -> IO (Maybe String)
+findPort vendorId productId = fmap (fmap portName . listToMaybe) $ usbSerials (Just vendorId) (Just productId)
 
 buildDir = "_build"
 

@@ -57,7 +57,9 @@ keyToVidPid name
             _         -> Nothing
 
 withHKey :: HKEY -> String -> (HKEY -> IO a) -> IO a
-withHKey hive path = handle (\(SomeException e) -> error $ show e) . bracket (regOpenKey hive path) regCloseKey
+withHKey hive path
+    = handle (\(SomeException e) -> error $ show e ++ ": " ++ path)
+    . bracket (regOpenKey hive path) regCloseKey
 
 -- | Read DWORD value from registry.
 -- From http://compgroups.net/comp.lang.haskell/working-with-the-registry-windows-xp/2579164
