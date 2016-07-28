@@ -113,7 +113,7 @@ unoPort = do
 leonardoBootPort :: Action FilePath
 leonardoBootPort = do
     b <- fmap (fromMaybe False . fmap read) $ getConfig "MANUAL_BOOT"
-    when b $ do
+    unless b $ do
         port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x8036
         port <- fmap (fromMaybe port) $ getConfig "PORT"
         liftIO $ putStrLn $ "resetting " ++ port
