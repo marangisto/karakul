@@ -25,7 +25,7 @@ instance Show USBSerial where
 
 usbSerials :: Maybe Int -> Maybe Int -> IO [USBSerial]
 usbSerials mVendorId mProductId = withHKey hKEY_LOCAL_MACHINE path $ \hkey -> do
-    n <- regQueryValueDWORD hkey "Count"
+    n <- fmap fromEnum $ regQueryValueDWORD hkey "Count"
     fmap catMaybes $ forM [0..n-1] $ \i -> do
         key <- regQueryValue hkey . Just . show $ i
         case keyToVidPid key of
