@@ -28,6 +28,9 @@ ccflags =
 ldflags =
     [ "-Os"
     , "-Wl,--gc-sections"
+    , "-Wl,-u,vfprintf"
+    , "-lprintf_flt"
+    , "-lm"
     ]
 
 filterGarbageFiles :: [FilePath] -> [FilePath]
