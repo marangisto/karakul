@@ -3,6 +3,7 @@ module ShakeMCU.Config where
 import ShakeMCU.ToolChain
 import Development.Shake
 import Development.Shake.Config
+import Development.Shake.FilePath
 import Control.Applicative
 import Data.Maybe (fromMaybe)
 
@@ -20,6 +21,11 @@ getF_CPU = do
     freq <- getConfig "F_CPU"
     board <- getBoard
     return $ fromMaybe 16e6 $ fmap read freq <|> fmap (snd . boardMCU) board
+
+getLibs :: MCU -> Action [String]
+getLibs mcu = fromMaybe (defLibs $ arch mcu) . fmap words <$> getConfig "LIBS"
+    where defLibs AVR = [ "AVR" ]
+          defLibs _ = []
 
 getPort :: Action (Maybe FilePath)
 getPort = getConfig "PORT"
