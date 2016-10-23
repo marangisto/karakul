@@ -9,6 +9,7 @@ import Development.Shake.Command
 import Development.Shake.FilePath
 import Development.Shake.Config
 import Development.Shake.Util
+import System.FilePath (takeBaseName)
 import Data.Maybe (fromMaybe)
 import Data.List (isPrefixOf)
 
@@ -23,30 +24,30 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         cpps <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.cpp" ]
         mcu <- getMCU
         let objs = [ buildDir </> c <.> "o" | c <- cs ++ cpps ]
---            libs = [ buildDir </> "mk64fx512.o" ] -- FIXME: lib / shared location and conditional on architecture and mcu
-        need $ objs -- ++ libs
-        (command, flags) <- fmap (ld . toolChain) getMCU
-        () <- cmd command flags "-o" [ out ] objs -- libs -- FIXME: -l lib flags
-        (command, flags) <- fmap (size . toolChain) getMCU
+        libs <- (map (\l -> buildDir </> l <.> "a")) <$> getLibs mcu
+        need $ objs ++ libs
+        (command, flags) <- ld . toolChain <$> getMCU
+        () <- cmd command flags "-o" [ out ] objs libs
+        (command, flags) <- size . toolChain <$> getMCU
         cmd command flags [ out ]
 
     buildDir </> "image" <.> "hex" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        (command, flags) <- fmap (objcopy . toolChain) getMCU
+        (command, flags) <- objcopy . toolChain <$> getMCU
         cmd command flags [ "-Oihex" , "-R.eeprom" ] [ elf ] [ out ]
 
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        (command, flags) <- fmap (objdump . toolChain) getMCU
+        (command, flags) <- objdump . toolChain <$> getMCU
         cmd (FileStdout out) command flags "-S" [ elf ]
 
     let compile tool out = do
-        let src = dropExtension . dropDirectory1 $ out
+        let src = takeDirectory (takeDirectory out) </> dropExtension (takeFileName out)
             m = out -<.> "m"
         freq <- getF_CPU
-        (command, flags) <- fmap (tool . toolChain) getMCU
+        (command, flags) <- tool . toolChain <$> getMCU
         let include = [ "-I.." ]
         () <- cmd command flags
             [ "-c", "-g", "-O3", "-w" ] include
@@ -56,6 +57,18 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
 
     buildDir <//> "*.c.o" %> compile cc
     buildDir <//> "*.cpp.o" %> compile cpp
+
+    buildDir <//> "*.a" %> \out -> do
+        let libDir = ".." </> takeBaseName out
+        cs <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.c" ]
+        cpps <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.cpp" ]
+        let objs = [ libDir </> buildDir </> c <.> "o" | c <- cs ++ cpps ]
+        need objs
+        (command, flags) <- ar . toolChain <$> getMCU
+        cmd command flags "rcs" out objs
+
+    ".." <//> "*.c.o" %> compile cc
+    ".." <//> "*.cpp.o" %> compile cpp
 
     phony "upload" $ do
         let hex = buildDir </> "image" <.> "hex"
