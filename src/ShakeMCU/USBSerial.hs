@@ -1,5 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
-module USBSerial (USBSerial(..), usbSerials) where
+module ShakeMCU.USBSerial (USBSerial(..), findPort, usbSerials) where
 
 import System.Win32.Registry (hKEY_LOCAL_MACHINE, regOpenKey, regCloseKey, regQueryValue, regQueryValueEx)
 import System.Win32.Types (DWORD, HKEY)
@@ -8,7 +8,7 @@ import Foreign (toBool, Storable(peek, sizeOf), castPtr, alloca)
 import Data.List.Split (splitOn)
 import Data.List (stripPrefix)
 import Numeric (readHex, showHex)
-import Data.Maybe (catMaybes)
+import Data.Maybe (catMaybes, listToMaybe)
 import Control.Monad (forM)
 
 data USBSerial = USBSerial
@@ -22,6 +22,9 @@ data USBSerial = USBSerial
 instance Show USBSerial where
     show USBSerial{..} = unwords [ portName, toHex vendorId, toHex productId, friendlyName ]
         where toHex x = let s = showHex x "" in replicate (4 - length s) '0' ++ s
+
+findPort :: Int -> Int -> IO (Maybe String)
+findPort vendorId productId = fmap (fmap portName . listToMaybe) $ usbSerials (Just vendorId) (Just productId)
 
 usbSerials :: Maybe Int -> Maybe Int -> IO [USBSerial]
 usbSerials mVendorId mProductId = withHKey hKEY_LOCAL_MACHINE path $ \hkey -> do
