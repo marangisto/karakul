@@ -62,7 +62,7 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         (command, flags) <- tool . toolChain <$> getMCU
         let include = [ "-I.." ]
         () <- cmd command flags
-            [ "-c", "-g", "-Os" ] include
+            [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
             ("-DF_CPU=" ++ show (round freq) ++ "L")
             [ src ] "-o" [ out ] "-MMD -MF" [ m ]
         needMakefileDependencies m
