@@ -62,5 +62,11 @@ programmer (Just TrinketPro) mcu hex = return
         , "-D"
         , "-Uflash:w:" ++ hex ++ ":i"
         ])
+programmer (Just Teensy35) mcu hex = return
+    ("teensy_loader_cli",
+        [ "--mcu=" ++ mcuStr mcu
+        , "-v"
+        , hex
+        ])
 programmer (Just b) _ _ = error $ "don't know how to program board: " ++ show b
 

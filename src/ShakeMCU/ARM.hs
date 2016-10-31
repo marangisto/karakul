@@ -7,7 +7,7 @@ toolChain :: MCU -> ToolChain
 toolChain mcu = ToolChain{..}
     where name = "arm-none-eabi-gcc"
           cc = ("arm-none-eabi-gcc", ccFlags mcu)
-          cpp = ("arm-none-eabi-g++", cppFlags mcu)
+          cpp = ("arm-none-eabi-g++", ccFlags mcu ++ cppFlags mcu)
           ld = ("arm-none-eabi-gcc", ldFlags mcu)
           ar = ("arm-none-eabi-ar", [])
           objcopy = ("arm-none-eabi-objcopy", [])
@@ -28,6 +28,7 @@ ccFlags mcu =
     , "-DLAYOUT_US_ENGLISH"
     , "-DARDUINO=10600"
     , "-DTEENSYDUINO=121"
+    , "-I../Teensy3"
     ]
 
 cppFlags _ =
