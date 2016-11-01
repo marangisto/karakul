@@ -32,7 +32,7 @@ ccFlags mcu =
     ]
 
 cppFlags _ =
-    [ "-std=gnu++0x"
+    [ "-std=gnu++11"
     , "-felide-constructors"
     , "-fno-exceptions"
     , "-fno-rtti"
