@@ -40,7 +40,7 @@ cppFlags _ =
 
 ldFlags mcu =
     [ "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1476636451"
-    , "-TC:/tmp/" ++ mcuStr mcu ++ ".ld"   -- FIXME: need this file somewhere!
+    , "-T../Teensy3/" ++ mcuStr mcu ++ ".ld"   -- FIXME: need this file somewhere!
     , "-mthumb"
     , "-mcpu=cortex-m4"
     , "-mfloat-abi=hard"
