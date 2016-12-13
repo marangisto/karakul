@@ -1,4 +1,4 @@
-module ShakeMCU.ToolChain where
+module Internal.ToolChain where
 
 import Data.Char (toLower)
 

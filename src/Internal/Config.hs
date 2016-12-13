@@ -1,6 +1,6 @@
-module ShakeMCU.Config where
+module Internal.Config where
 
-import ShakeMCU.ToolChain
+import Internal.ToolChain
 import Development.Shake
 import Development.Shake.Config
 import Development.Shake.FilePath

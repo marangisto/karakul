@@ -1,9 +1,9 @@
-import ShakeMCU.Config
-import ShakeMCU.ToolChain
-import ShakeMCU.Program
-import ShakeMCU.USBSerial
-import qualified ShakeMCU.AVR as AVR
-import qualified ShakeMCU.ARM as ARM
+import Internal.Config
+import Internal.ToolChain
+import Internal.Program
+import Internal.USBSerial
+import qualified Internal.AVR as AVR
+import qualified Internal.ARM as ARM
 import Development.Shake
 import Development.Shake.Command
 import Development.Shake.FilePath

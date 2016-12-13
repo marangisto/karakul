@@ -1,8 +1,8 @@
-module ShakeMCU.Program where
+module Internal.Program where
 
-import ShakeMCU.Config
-import ShakeMCU.ToolChain
-import ShakeMCU.USBSerial
+import Internal.Config
+import Internal.ToolChain
+import Internal.USBSerial
 import Development.Shake
 import Control.Applicative
 import Data.Maybe (fromMaybe)

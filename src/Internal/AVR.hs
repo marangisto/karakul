@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
-module ShakeMCU.AVR (toolChain) where
+module Internal.AVR (toolChain) where
 
-import ShakeMCU.ToolChain
+import Internal.ToolChain
 
 toolChain :: MCU -> ToolChain
 toolChain mcu = ToolChain{..}
