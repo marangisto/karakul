@@ -9,6 +9,7 @@ data MCU
     | ATTINY85
     | MK64FX512
     | MK66FX1M0
+    | SAM3X8E
     deriving (Read, Show)
 
 mcuStr :: MCU -> String
@@ -23,10 +24,12 @@ arch ATMEGA32U4     = AVR
 arch ATTINY85       = AVR
 arch MK64FX512      = ARM
 arch MK66FX1M0      = ARM
+arch SAM3X8E        = ARM
 
 data Board
     = Uno
     | Leonardo
+    | Due
     | TrinketPro
     | Teensy35
     | Teensy36
@@ -37,6 +40,7 @@ type Freq = Double
 boardMCU :: Board -> (MCU, Freq)
 boardMCU Uno            = (ATMEGA328P,      16e6)
 boardMCU Leonardo       = (ATMEGA32U4,      16e6)
+boardMCU Due            = (SAM3X8E,         84e6)
 boardMCU TrinketPro     = (ATMEGA328P,      16e6)
 boardMCU Teensy35       = (MK64FX512,       120e6)
 boardMCU Teensy36       = (MK66FX1M0,       180e6)

@@ -68,5 +68,20 @@ programmer (Just Teensy35) mcu hex = return
         , "-v"
         , hex
         ])
+programmer (Just Due) _ hex = do
+    port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x003d
+    liftIO $ withSerial port defaultSerialSettings { commSpeed = CS1200 } $ \port -> threadDelay 2000000
+    return ("bossac",
+        [ "-i"
+        , "-d"
+        , "--port=" ++ port
+        , "-Utrue"
+        , "-e"
+        , "-w"
+        , "-v"
+        , "-b"
+        , hex
+        , "-R"
+        ])
 programmer (Just b) _ _ = error $ "don't know how to program board: " ++ show b
 
