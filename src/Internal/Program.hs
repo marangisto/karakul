@@ -75,7 +75,7 @@ programmer (Just Due) _ hex = do
         [ "-i"
         , "-d"
         , "--port=" ++ port
-        , "-Utrue"
+        , "-Ufalse"
         , "-e"
         , "-w"
         , "-v"

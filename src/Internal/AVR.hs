@@ -10,7 +10,7 @@ toolChain mcu = ToolChain{..}
           cpp = ("avr-g++", cppFlags mcu)
           ld = ("avr-gcc", ldFlags mcu)
           ar = ("avr-ar", [])
-          objcopy = ("avr-objcopy", [])
+          objcopy = ("avr-objcopy", copyFlags mcu)
           objdump = ("avr-objdump", [])
           size = ("avr-size", [ "--mcu=" ++ mcuStr mcu, "--format=avr" ])
 
@@ -32,5 +32,10 @@ ldFlags mcu =
     , "-Wl,-u,vfprintf"
     , "-lprintf_flt"
     , "-lm"
+    ]
+
+copyFlags _ =
+    [ "-Oihex"
+    , "-R.eeprom"
     ]
 

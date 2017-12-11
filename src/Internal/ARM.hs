@@ -13,7 +13,7 @@ toolChain mcu = ToolChain{..}
           cpp = ("arm-none-eabi-g++", ccFlags mcu ++ cppFlags mcu)
           ld = ("arm-none-eabi-ld", ldFlags mcu)
           ar = ("arm-none-eabi-ar", [])
-          objcopy = ("arm-none-eabi-objcopy", [])
+          objcopy = ("arm-none-eabi-objcopy", copyFlags mcu)
           objdump = ("arm-none-eabi-objdump", [])
           size = ("arm-none-eabi-size", [])
 
@@ -24,10 +24,8 @@ ccFlags SAM3X8E =
     , "-I../ARM"
     , "-I" ++ samDir ++ "/system/CMSIS/CMSIS/include"
     , "-I" ++ samDir ++ "/system/CMSIS/Device/ATMEL/sam3xa/include"
-
     , "-ffunction-sections"
     , "-fdata-sections"
-    --, "-nostdlib"
     ]
 ccFlags mcu =
     [ "-ffunction-sections"
@@ -63,7 +61,6 @@ ldFlags mcu@MK64FX512 = ("-T../Teensy3/" ++ mcuStr mcu ++ ".ld") : ldFlagsMK6   
 ldFlags mcu@MK66FX1M0 = ("-T../Teensy3/" ++ mcuStr mcu ++ ".ld") : ldFlagsMK6   -- FIXME: need this file somewhere!
 ldFlags SAM3X8E =
     [ "--gc-sections"
-    , "--print-map"
     , "-T" ++ samDir ++ "/variants/arduino_due_x/linker_scripts/gcc/flash.ld"
     , "--entry=Reset_Handler"
     ]
@@ -76,3 +73,12 @@ ldFlagsMK6 =
     , "-mfpu=fpv4-sp-d16"
     , "-fsingle-precision-constant"
     ]
+
+copyFlags SAM3X8E =
+    [ "-Obinary"
+    ]
+copyFlags _ =
+    [ "-Oihex"
+    , "-R.eeprom"
+    ]
+

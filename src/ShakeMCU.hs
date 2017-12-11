@@ -37,7 +37,7 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         let elf = out -<.> ".elf"
         need [ elf ]
         (command, flags) <- objcopy . toolChain <$> getMCU
-        cmd command flags [ "-Oihex" , "-R.eeprom" ] [ elf ] [ out ]
+        cmd command flags [ elf ] [ out ]
 
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
