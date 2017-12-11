@@ -29,21 +29,21 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         libs <- (map (\l -> buildDir </> l </> l <.> "a")) <$> getLibs mcu
         need $ objs ++ libs
         (command, flags) <- ld . toolChain <$> getMCU
-        () <- cmd command flags "-o" [ out ] objs libs
+        () <- cmd command (flags $ objs ++ libs) "-o" [ out ]
         (command, flags) <- size . toolChain <$> getMCU
-        cmd command flags [ out ]
+        cmd command (flags []) [ out ]
 
     buildDir </> "image" <.> "hex" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
         (command, flags) <- objcopy . toolChain <$> getMCU
-        cmd command flags [ elf ] [ out ]
+        cmd command (flags []) [ elf ] [ out ]
 
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
         (command, flags) <- objdump . toolChain <$> getMCU
-        cmd (FileStdout out) command flags "-S" [ elf ]
+        cmd (FileStdout out) command (flags []) "-S" [ elf ]
 
     buildDir <//> "*.a" %> \out -> do
         let libName = takeBaseName out
@@ -53,7 +53,7 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         let objs = [ buildDir </> libName </> c <.> "o" | c <- cs ++ cpps ]
         need objs
         (command, flags) <- ar . toolChain <$> getMCU
-        cmd command flags "rcs" out objs
+        cmd command (flags []) "rcs" out objs
 
     let compile tool out = do
         let src = ".." </> dropDirectory1 (dropExtension out)
@@ -61,7 +61,7 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         freq <- getF_CPU
         (command, flags) <- tool . toolChain <$> getMCU
         let include = [ "-I.." ]
-        () <- cmd command flags
+        () <- cmd command (flags [])
             [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
             ("-DF_CPU=" ++ show (round freq) ++ "L")
             [ src ] "-o" [ out ] "-MMD -MF" [ m ]
@@ -76,7 +76,7 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         board <- getBoard
         mcu <- getMCU
         (command, flags) <- programmer board mcu hex
-        cmd command flags
+        cmd command (flags [])
 
     phony "ports" $ liftIO $ usbSerials Nothing Nothing >>= mapM_ print
 

@@ -45,7 +45,7 @@ boardMCU TrinketPro     = (ATMEGA328P,      16e6)
 boardMCU Teensy35       = (MK64FX512,       120e6)
 boardMCU Teensy36       = (MK66FX1M0,       180e6)
 
-type Tool = (String, [String])
+type Tool = (String, [String] -> [String])
 
 data ToolChain = ToolChain
     { name      :: String

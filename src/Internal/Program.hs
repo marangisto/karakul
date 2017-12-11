@@ -12,7 +12,7 @@ import Control.Monad
 
 programmer :: Maybe Board -> MCU -> FilePath -> Action Tool
 programmer Nothing mcu hex = return
-    ("atprogram",
+    ("atprogram", \_ ->
         [ "-t"
         , "avrispmk2"
         , "-d"
@@ -28,7 +28,7 @@ programmer Nothing mcu hex = return
 programmer (Just Uno) mcu hex = do
     port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x43
     port <- fmap (fromMaybe port) $ getPort
-    return ("avrdude",
+    return ("avrdude", \_ ->
         [ "-c" ++ "arduino"
         , "-p" ++ mcuStr mcu
         , "-P" ++ port
@@ -47,7 +47,7 @@ programmer (Just Leonardo) mcu hex = do
     port <- fmap (fromMaybe "COM4") $ liftIO $ findPort 0x2341 0x36
     bootPort <- getBootPort
     port <- return $ fromMaybe port bootPort
-    return ("avrdude",
+    return ("avrdude", \_ ->
         [ "-c" ++ "avr109"
         , "-p" ++ mcuStr mcu
         , "-P" ++ port
@@ -56,14 +56,14 @@ programmer (Just Leonardo) mcu hex = do
         , "-Uflash:w:" ++ hex ++ ":i"
         ])
 programmer (Just TrinketPro) mcu hex = return
-    ("avrdude",
+    ("avrdude", \_ ->
         [ "-c" ++ "usbtiny"
         , "-p" ++ mcuStr mcu
         , "-D"
         , "-Uflash:w:" ++ hex ++ ":i"
         ])
 programmer (Just Teensy35) mcu hex = return
-    ("teensy_loader_cli",
+    ("teensy_loader_cli", \_ ->
         [ "--mcu=" ++ mcuStr mcu
         , "-v"
         , hex
@@ -71,7 +71,7 @@ programmer (Just Teensy35) mcu hex = return
 programmer (Just Due) _ hex = do
     port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x003d
     liftIO $ withSerial port defaultSerialSettings { commSpeed = CS1200 } $ \port -> threadDelay 2000000
-    return ("bossac",
+    return ("bossac", \_ ->
         [ "-i"
         , "-d"
         , "--port=" ++ port
