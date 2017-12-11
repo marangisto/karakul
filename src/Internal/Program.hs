@@ -73,7 +73,6 @@ programmer (Just Due) _ hex = do
     liftIO $ withSerial port defaultSerialSettings { commSpeed = CS1200 } $ \port -> threadDelay 2000000
     return ("bossac", \_ ->
         [ "-i"
-        , "-d"
         , "--port=" ++ port
         , "-Ufalse"
         , "-e"
