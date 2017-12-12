@@ -24,6 +24,7 @@ ccFlags SAM3X8E =
     , "-I../ARM"
     , "-I" ++ samDir ++ "/system/CMSIS/CMSIS/include"
     , "-I" ++ samDir ++ "/system/CMSIS/Device/ATMEL"
+    , "-I" ++ samDir ++ "/system/CMSIS/Device/ATMEL/sam3xa/include"
     , "-I" ++ samDir ++ "/system/libsam"
     , "-I" ++ samDir ++ "/cores/arduino"
     , "-ffunction-sections"
@@ -50,6 +51,7 @@ cppFlags SAM3X8E =
     [ "-std=gnu++11"
     , "-fno-threadsafe-statics"
     , "-fno-exceptions"
+    , "-fno-rtti"
     ]
 cppFlags MK64FX512 =
     [ "-std=gnu++11"
@@ -82,8 +84,7 @@ ldFlags SAM3X8E objs =
     , "-u kill"
     , "-u _getpid"
     ] ++ objs ++
-    [ samDir ++ "/variants/arduino_due_x/libsam_sam3x8e_gcc_rel.a"
-    , "-Wl,--end-group"
+    [ "-Wl,--end-group"
     , "-lm"
     , "-gcc"
     ]
