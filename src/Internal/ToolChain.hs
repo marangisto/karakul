@@ -7,6 +7,7 @@ data MCU
     | ATMEGA328P
     | ATMEGA32U4
     | ATTINY85
+    | ATTINY84
     | MK64FX512
     | MK66FX1M0
     | SAM3X8E
@@ -22,6 +23,7 @@ arch ATMEGA328      = AVR
 arch ATMEGA328P     = AVR
 arch ATMEGA32U4     = AVR
 arch ATTINY85       = AVR
+arch ATTINY84       = AVR
 arch MK64FX512      = ARM
 arch MK66FX1M0      = ARM
 arch SAM3X8E        = ARM
