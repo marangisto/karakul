@@ -5,6 +5,7 @@ import Data.Char (toLower)
 data MCU
     = ATMEGA328
     | ATMEGA328P
+    | ATMEGA328PB
     | ATMEGA32U4
     | ATTINY85
     | ATTINY84
@@ -21,6 +22,7 @@ data ARCH = AVR | ARM deriving (Read, Show)
 arch :: MCU -> ARCH
 arch ATMEGA328      = AVR
 arch ATMEGA328P     = AVR
+arch ATMEGA328PB    = AVR
 arch ATMEGA32U4     = AVR
 arch ATTINY85       = AVR
 arch ATTINY84       = AVR
