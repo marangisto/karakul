@@ -30,6 +30,7 @@ programmer (Just Uno) mcu hex = do
     port <- fmap (fromMaybe port) $ getPort
     return ("avrdude", \_ ->
         [ "-c" ++ "arduino"
+        , "-C" ++ avrdudeConf
         , "-p" ++ mcuStr mcu
         , "-P" ++ port
         , "-b" ++ "115200"
@@ -49,6 +50,7 @@ programmer (Just Leonardo) mcu hex = do
     port <- return $ fromMaybe port bootPort
     return ("avrdude", \_ ->
         [ "-c" ++ "avr109"
+        , "-C" ++ avrdudeConf
         , "-p" ++ mcuStr mcu
         , "-P" ++ port
         , "-b" ++ "57600"
@@ -58,6 +60,7 @@ programmer (Just Leonardo) mcu hex = do
 programmer (Just TrinketPro) mcu hex = return
     ("avrdude", \_ ->
         [ "-c" ++ "usbtiny"
+        , "-C" ++ avrdudeConf
         , "-p" ++ mcuStr mcu
         , "-D"
         , "-Uflash:w:" ++ hex ++ ":i"
@@ -83,4 +86,7 @@ programmer (Just Due) _ hex = do
         , "-R"
         ])
 programmer (Just b) _ _ = error $ "don't know how to program board: " ++ show b
+
+avrdudeConf :: FilePath
+avrdudeConf = "c:/Program Files (x86)/Arduino/hardware/tools/avr/etc/avrdude.conf"
 
