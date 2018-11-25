@@ -1,3 +1,5 @@
+module ShakeMCU (main) where
+
 import Internal.Config
 import Internal.ToolChain
 import Internal.Program
@@ -56,16 +58,16 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         cmd command (flags []) "rcs" out objs
 
     let compile tool out = do
-        let src = ".." </> dropDirectory1 (dropExtension out)
-            m = out -<.> "m"
-        freq <- getF_CPU
-        (command, flags) <- tool . toolChain <$> getMCU
-        let include = [ "-I.." ]
-        () <- cmd command (flags [])
-            [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
-            ("-DF_CPU=" ++ show (round freq) ++ "L")
-            [ src ] "-o" [ out ] "-MMD -MF" [ m ]
-        needMakefileDependencies m
+            let src = ".." </> dropDirectory1 (dropExtension out)
+                m = out -<.> "m"
+            freq <- getF_CPU
+            (command, flags) <- tool . toolChain <$> getMCU
+            let include = [ "-I.." ]
+            () <- cmd command (flags [])
+                [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
+                ("-DF_CPU=" ++ show (round freq) ++ "L")
+                [ src ] "-o" [ out ] "-MMD -MF" [ m ]
+            needMakefileDependencies m
 
     buildDir <//> "*.c.o" %> compile cc
     buildDir <//> "*.cpp.o" %> compile cpp

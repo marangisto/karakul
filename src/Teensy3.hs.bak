@@ -1,0 +1,61 @@
+import Development.Shake
+import Development.Shake.Command
+import Development.Shake.FilePath
+import Development.Shake.Util
+import Data.Char (toUpper)
+
+teensyDir = "C:/Program Files (x86)/Arduino/hardware/teensy/avr/cores/teensy3"
+buildDir = "_build"
+
+ccflags mcu freq =
+    [ "-g"
+    , "-Os"
+    , "-Wall"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    , "-nostdlib"
+    , "-mthumb"
+    , "-mcpu=cortex-m4"
+    , "-mfloat-abi=hard"
+    , "-mfpu=fpv4-sp-d16"
+    , "-fsingle-precision-constant"
+    , "-D__" ++ map toUpper mcu ++ "__"
+    , "-DF_CPU=" ++ show (round freq) ++ "L"
+    , "-DUSB_SERIAL"
+    , "-DLAYOUT_US_ENGLISH"
+    , "-DARDUINO=10600"
+    , "-DTEENSYDUINO=121"
+    , "-I" ++ teensyDir
+    ]
+
+cppflags =
+    [ "-std=gnu++0x"
+    , "-felide-constructors"
+    , "-fno-exceptions"
+    , "-fno-rtti"
+    ]
+
+main :: IO ()
+main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
+    want [ buildDir </> "teensy3.5" <.> "a" ]
+
+    phony "clean" $ do
+        putNormal $ "Cleaning files in " ++ buildDir
+        removeFilesAfter buildDir [ "//*" ]
+
+    buildDir </> "teensy3.5" <.> "a" %> \out -> do
+        cs <- getDirectoryFiles teensyDir [ "//*.c" ]
+        cpps <- getDirectoryFiles teensyDir [ "//*.cpp" ]
+        let objs = [ buildDir </> c <.> "o" | c <- cs ++ cpps ]
+        need objs
+        cmd "arm-none-eabi-ar" "rcs" out objs
+
+    let compile compiler flags out = do
+        let src = teensyDir </> (dropExtension . dropDirectory1 $ out)
+            m = out -<.> "m"
+        () <- cmd compiler "-c" flags [ src ] "-o" [ out ] "-MMD -MF" [ m ]
+        needMakefileDependencies m
+
+    buildDir <//> "*.c.o" %> compile "arm-none-eabi-gcc" (ccflags "mk64fx512" 120e6)
+    buildDir <//> "*.cpp.o" %> compile "arm-none-eabi-g++" (ccflags "mk64fx512" 120e6 ++ cppflags)
+

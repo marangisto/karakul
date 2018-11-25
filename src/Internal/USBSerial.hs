@@ -30,7 +30,7 @@ usbSerials :: Maybe Int -> Maybe Int -> IO [USBSerial]
 usbSerials mVendorId mProductId = withHKey hKEY_LOCAL_MACHINE path $ \hkey -> do
     n <- fmap fromEnum $ regQueryValueDWORD hkey "Count"
     fmap catMaybes $ forM [0..n-1] $ \i -> do
-        key <- regQueryValue hkey . Just . show $ i
+        key <- regQueryValue hkey . show $ i
         case keyToVidPid key of
             Just (vendorId, productId)
                 | maybe True (==vendorId) mVendorId && maybe True (==productId) mProductId -> do
@@ -41,11 +41,11 @@ usbSerials mVendorId mProductId = withHKey hKEY_LOCAL_MACHINE path $ \hkey -> do
     where path = "SYSTEM\\CurrentControlSet\\Services\\usbser\\Enum"
 
 getPortName :: String -> IO String
-getPortName serial = withHKey hKEY_LOCAL_MACHINE path $ flip regQueryValue (Just "PortName")
+getPortName serial = withHKey hKEY_LOCAL_MACHINE path $ flip regQueryValue "PortName"
     where path = "SYSTEM\\CurrentControlSet\\Enum\\" ++ serial ++ "\\Device Parameters"
 
 getFriendlyName :: String -> IO String
-getFriendlyName serial = withHKey hKEY_LOCAL_MACHINE path $ flip regQueryValue (Just "FriendlyName")
+getFriendlyName serial = withHKey hKEY_LOCAL_MACHINE path $ flip regQueryValue "FriendlyName"
     where path = "SYSTEM\\CurrentControlSet\\Enum\\" ++ serial
 
 keyToVidPid :: String -> Maybe (Int, Int)
