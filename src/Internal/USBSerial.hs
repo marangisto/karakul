@@ -1,8 +1,10 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE CPP, RecordWildCards #-}
 module Internal.USBSerial (USBSerial(..), findPort, usbSerials) where
 
+#if defined WIN32
 import System.Win32.Registry (hKEY_LOCAL_MACHINE, regOpenKey, regCloseKey, regQueryValue, regQueryValueEx)
 import System.Win32.Types (DWORD, HKEY)
+#endif
 import Control.Exception (handle, bracket, SomeException(..))
 import Foreign (toBool, Storable(peek, sizeOf), castPtr, alloca) 
 import Data.List.Split (splitOn)
@@ -26,6 +28,7 @@ instance Show USBSerial where
 findPort :: Int -> Int -> IO (Maybe String)
 findPort vendorId productId = fmap (fmap portName . listToMaybe) $ usbSerials (Just vendorId) (Just productId)
 
+#if defined WIN32
 usbSerials :: Maybe Int -> Maybe Int -> IO [USBSerial]
 usbSerials mVendorId mProductId = withHKey hKEY_LOCAL_MACHINE path $ \hkey -> do
     n <- fmap fromEnum $ regQueryValueDWORD hkey "Count"
@@ -58,7 +61,6 @@ keyToVidPid name
     where fromHex s = case readHex s of
             [(x, "")] -> Just x
             _         -> Nothing
-
 withHKey :: HKEY -> String -> (HKEY -> IO a) -> IO a
 withHKey hive path
     = handle (\(SomeException e) -> error $ show e ++ ": " ++ path)
@@ -70,4 +72,8 @@ regQueryValueDWORD :: HKEY -> String -> IO DWORD
 regQueryValueDWORD hkey name = alloca $ \ptr -> do
     regQueryValueEx hkey name (castPtr ptr) (sizeOf (undefined :: DWORD))
     peek ptr
+#else
+usbSerials :: Maybe Int -> Maybe Int -> IO [USBSerial]
+usbSerials _ _ = pure []
+#endif
 
