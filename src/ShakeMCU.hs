@@ -54,8 +54,9 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         cmd (FileStdout out) command (flags []) "-S" [ elf ]
 
     buildDir <//> "*.a" %> \out -> do
+        baseDir <- fromMaybe "../.." <$> getConfig "BASE_DIR"
         let libName = takeBaseName out
-        let libDir = ".." </> libName
+        let libDir = baseDir </> libName </> "src"
         cs <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.c" ]
         cpps <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.cpp" ]
         let objs = [ buildDir </> libName </> c <.> "o" | c <- cs ++ cpps ]
@@ -64,7 +65,12 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         cmd command (flags []) "rcs" out objs
 
     let compile tool out = do
-            let src = ".." </> dropDirectory1 (dropExtension out)
+            baseDir <- fromMaybe "../.." <$> getConfig "BASE_DIR"
+            this <- fmap takeBaseName $ liftIO getCurrentDirectory
+            let src | [ buildDir, lib, name ] <- splitDirectories out
+                    , lib /= this
+                    = baseDir </> lib </> "src" </> dropExtension name
+                    | otherwise = ".." </> dropDirectory1 (dropExtension out)
                 m = out -<.> "m"
             freq <- getF_CPU
             (command, flags) <- tool . toolChain <$> getMCU

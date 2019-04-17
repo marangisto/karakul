@@ -23,9 +23,10 @@ getF_CPU = do
     return $ fromMaybe 16e6 $ fmap read freq <|> fmap (snd . boardMCU) board
 
 getLibs :: MCU -> Action [String]
-getLibs mcu = fromMaybe (defLibs $ arch mcu) . fmap words <$> getConfig "LIBS"
-    where defLibs AVR = [ "AVR" ]
-          defLibs _ = []
+getLibs mcu = fromMaybe (defLibs mcu $ arch mcu) . fmap words <$> getConfig "LIBS"
+    where defLibs _ AVR = [ "AVR" ]
+          defLibs STM32F051 _ = [ "stm32" ]
+          defLibs _ _ = []
 
 getPort :: Action (Maybe FilePath)
 getPort = getConfig "PORT"
