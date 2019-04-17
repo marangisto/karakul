@@ -11,6 +11,12 @@ import Control.Concurrent
 import Control.Monad
 
 programmer :: Maybe Board -> MCU -> FilePath -> Action Tool
+programmer Nothing STM32F051 bin = return
+    ("st-flash", \_ ->
+        [ "write"
+        , bin
+        , "0x8000000"
+        ])
 programmer Nothing mcu hex = return
     ("atprogram", \_ ->
         [ "-t"

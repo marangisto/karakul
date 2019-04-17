@@ -20,7 +20,7 @@ main :: IO ()
 main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     usingConfigFile "build.mk"
 
-    want [ buildDir </> "image" <.> "hex", buildDir </> "image" <.> "s" ]
+    want [ buildDir </> "image" <.> "s" ]
 
     buildDir </> "image" <.> "elf" %> \out -> do
         name <- fmap takeBaseName $ liftIO getCurrentDirectory
@@ -39,7 +39,13 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         let elf = out -<.> ".elf"
         need [ elf ]
         (command, flags) <- objcopy . toolChain <$> getMCU
-        cmd command (flags []) [ elf ] [ out ]
+        cmd command (flags []) [ elf ] "-Oihex" [ out ]
+
+    buildDir </> "image" <.> "bin" %> \out -> do
+        let elf = out -<.> ".elf"
+        need [ elf ]
+        (command, flags) <- objcopy . toolChain <$> getMCU
+        cmd command (flags []) [ elf ] "-Obinary" [ out ]
 
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
@@ -64,7 +70,8 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
             (command, flags) <- tool . toolChain <$> getMCU
             let include = [ "-I.." ]
             () <- cmd command (flags [])
-                [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
+                [ "-c", "-g", "-Werror", "-Wall" ] include
+                -- [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
                 ("-DF_CPU=" ++ show (round freq) ++ "L")
                 [ src ] "-o" [ out ] "-MMD -MF" [ m ]
             needMakefileDependencies m
@@ -73,11 +80,14 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     buildDir <//> "*.cpp.o" %> compile cpp
 
     phony "upload" $ do
-        let hex = buildDir </> "image" <.> "hex"
-        need [ hex ]
+        tc <- toolChain <$> getMCU
+        let payload = case format tc of
+                Hex -> buildDir </> "image" <.> "hex"
+                Binary -> buildDir </> "image" <.> "bin"
+        need [ payload ]
         board <- getBoard
         mcu <- getMCU
-        (command, flags) <- programmer board mcu hex
+        (command, flags) <- programmer board mcu payload
         cmd command (flags [])
 
     phony "ports" $ liftIO $ usbSerials Nothing Nothing >>= mapM_ print

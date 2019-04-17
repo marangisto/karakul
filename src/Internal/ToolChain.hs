@@ -12,6 +12,7 @@ data MCU
     | MK64FX512
     | MK66FX1M0
     | SAM3X8E
+    | STM32F051
     deriving (Read, Show)
 
 mcuStr :: MCU -> String
@@ -29,6 +30,7 @@ arch ATTINY84       = AVR
 arch MK64FX512      = ARM
 arch MK66FX1M0      = ARM
 arch SAM3X8E        = ARM
+arch STM32F051      = ARM
 
 data Board
     = Uno
@@ -49,6 +51,8 @@ boardMCU TrinketPro     = (ATMEGA328P,      16e6)
 boardMCU Teensy35       = (MK64FX512,       120e6)
 boardMCU Teensy36       = (MK66FX1M0,       180e6)
 
+data Format = Binary | Hex
+
 type Tool = (String, [String] -> [String])
 
 data ToolChain = ToolChain
@@ -60,5 +64,6 @@ data ToolChain = ToolChain
     , objcopy   :: Tool
     , objdump   :: Tool
     , size      :: Tool
+    , format    :: Format
     }
 

@@ -14,6 +14,7 @@ toolChain mcu = ToolChain{..}
           objcopy = ("avr-objcopy", \_ -> copyFlags mcu)
           objdump = ("avr-objdump", \_ -> [])
           size = ("avr-size", \_ -> [ "--mcu=" ++ mcuStr mcu, "--format=avr" ])
+          format = Hex
 
 ccFlags mcu =
     [ "-mmcu=" ++ mcuStr mcu
@@ -36,7 +37,6 @@ ldFlags mcu =
     ]
 
 copyFlags _ =
-    [ "-Oihex"
-    , "-R.eeprom"
+    [ "-R.eeprom"
     ]
 

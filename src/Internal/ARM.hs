@@ -2,9 +2,13 @@
 module Internal.ARM (toolChain) where
 
 import Internal.ToolChain
+import System.FilePath
 
 samDir :: FilePath
 samDir = "c:/Users/marten/AppData/Local/Arduino15/packages/arduino/hardware/sam/1.6.11"
+
+stmDir :: FilePath
+stmDir = "/home/marten/stm32/link"
 
 toolChain :: MCU -> ToolChain
 toolChain mcu = ToolChain{..}
@@ -14,9 +18,19 @@ toolChain mcu = ToolChain{..}
           ld = ("arm-none-eabi-gcc", \objs -> ldFlags mcu objs)
           ar = ("arm-none-eabi-ar", \_ -> [])
           objcopy = ("arm-none-eabi-objcopy", \_ -> copyFlags mcu)
-          objdump = ("arm-none-eabi-objdump", \_ -> [])
+          objdump = ("arm-none-eabi-objdump", \_ -> [ "--disassemble-all" ])
           size = ("arm-none-eabi-size", \_ -> [])
+          format = Binary
 
+ccFlags STM32F051 =
+    [ "-D__STM32F051__"
+    , "-mcpu=cortex-m0"
+    , "-mthumb"
+    , "-I../../stm32/include"
+    , "-I../../../stm32/include"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    ]
 ccFlags SAM3X8E =
     [ "-D__SAM3X8E__"
     , "-mcpu=cortex-m3"
@@ -47,6 +61,12 @@ ccFlags mcu =
     , "-I../Teensy3"
     ]
 
+cppFlags STM32F051 =
+    [ "-std=gnu++17"
+    , "-fno-threadsafe-statics"
+    , "-fno-exceptions"
+    , "-fno-rtti"
+    ]
 cppFlags SAM3X8E =
     [ "-std=gnu++11"
     , "-fno-threadsafe-statics"
@@ -61,6 +81,21 @@ cppFlags MK64FX512 =
     ]
 cppFlags MK66FX1M0 = cppFlags MK64FX512
 
+ldFlags STM32F051 objs =
+    [ "-mcpu=cortex-m0"
+    , "-mthumb"
+    , "-Wl,--gc-sections"
+    , "-T" ++ stmDir </> "stm32f051.ld"
+    , "-Wl,--check-sections"
+    , "-Wl,--entry=__reset"
+    , "-Wl,--unresolved-symbols=report-all"
+    , "-Wl,--warn-common"
+    , "-Wl,--warn-section-align"
+    , "-Wl,--start-group"
+    ] ++ objs ++
+    [ "-Wl,--end-group"
+    , "-lm"
+    ]
 ldFlags SAM3X8E objs =
     [ "-mcpu=cortex-m3"
     , "-mthumb"
@@ -100,11 +135,7 @@ ldFlagsMK6 objs =
     , "-fsingle-precision-constant"
     ] ++ objs
 
-copyFlags SAM3X8E =
-    [ "-Obinary"
-    ]
 copyFlags _ =
-    [ "-Oihex"
-    , "-R.eeprom"
+    [
     ]
 
