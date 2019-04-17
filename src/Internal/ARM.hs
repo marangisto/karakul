@@ -87,7 +87,7 @@ ldFlags STM32F051 objs =
     , "-Wl,--gc-sections"
     , "-T" ++ stmDir </> "stm32f051.ld"
     , "-Wl,--check-sections"
-    , "-Wl,--entry=__reset"
+    , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"
     , "-Wl,--warn-common"
     , "-Wl,--warn-section-align"
