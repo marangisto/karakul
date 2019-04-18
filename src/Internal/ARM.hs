@@ -23,7 +23,9 @@ toolChain mcu = ToolChain{..}
           format = Binary
 
 ccFlags STM32F051 =
-    [ "-D__STM32F051__"
+    [ "-DSTM32F0"
+    , "-DSTM32F0x1"
+    , "-DSTM32F051"
     , "-mcpu=cortex-m0"
     , "-mthumb"
     , "-I../../stm32/include"
