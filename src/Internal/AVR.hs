@@ -4,8 +4,8 @@ module Internal.AVR (toolChain) where
 import Internal.ToolChain
 import Data.List (intercalate)
 
-toolChain :: MCU -> ToolChain
-toolChain mcu = ToolChain{..}
+toolChain :: FilePath -> MCU -> ToolChain
+toolChain _ mcu = ToolChain{..}
     where name = "avr-gcc"
           cc = ("avr-gcc", \_ -> ccFlags mcu)
           cpp = ("avr-g++", \_ -> cppFlags mcu)

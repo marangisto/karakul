@@ -25,7 +25,7 @@ getF_CPU = do
 getLibs :: MCU -> Action [String]
 getLibs mcu = fromMaybe (defLibs mcu $ arch mcu) . fmap words <$> getConfig "LIBS"
     where defLibs _ AVR = [ "AVR" ]
-          defLibs STM32F051 _ = [ "stm32" ]
+          defLibs STM32F051 _ = [ "stm32f0" ]
           defLibs _ _ = []
 
 getPort :: Action (Maybe FilePath)
