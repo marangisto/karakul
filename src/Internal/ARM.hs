@@ -22,6 +22,7 @@ toolChain baseDir mcu = ToolChain{..}
 ccFlags baseDir STM32F051 =
     [ "-DSTM32F0"
     , "-DSTM32F0x1"
+    , "-DSTM32F05x"
     , "-DSTM32F051"
     , "-mcpu=cortex-m0"
     , "-mthumb"
