@@ -7,6 +7,7 @@ data MCU
     | ATMEGA328P
     | ATMEGA328PB
     | ATMEGA32U4
+    | ATMEGA2560
     | ATTINY85
     | ATTINY84
     | MK64FX512
@@ -24,6 +25,7 @@ arch ATMEGA328      = AVR
 arch ATMEGA328P     = AVR
 arch ATMEGA328PB    = AVR
 arch ATMEGA32U4     = AVR
+arch ATMEGA2560     = AVR
 arch ATTINY85       = AVR
 arch ATTINY84       = AVR
 arch MK64FX512      = ARM
@@ -32,6 +34,7 @@ arch SAM3X8E        = ARM
 
 data Board
     = Uno
+    | Mega2560
     | Leonardo
     | Due
     | TrinketPro
@@ -43,6 +46,7 @@ type Freq = Double
 
 boardMCU :: Board -> (MCU, Freq)
 boardMCU Uno            = (ATMEGA328P,      16e6)
+boardMCU Mega2560       = (ATMEGA2560,      16e6)
 boardMCU Leonardo       = (ATMEGA32U4,      16e6)
 boardMCU Due            = (SAM3X8E,         84e6)
 boardMCU TrinketPro     = (ATMEGA328P,      16e6)

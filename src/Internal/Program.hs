@@ -37,6 +37,19 @@ programmer (Just Uno) mcu hex = do
         , "-D"
         , "-Uflash:w:" ++ hex ++ ":i"
         ])
+programmer (Just Mega2560) mcu hex = do
+    port <- fmap (fromMaybe "COM3") $ liftIO $ findPort 0x2341 0x43 -- FIXME: use correct id!
+    port <- fmap (fromMaybe port) $ getPort
+    return ("avrdude", \_ ->
+        [ "-c" ++ "arduino"
+        , "-C" ++ avrdudeConf
+        , "-p" ++ mcuStr mcu
+        , "-P" ++ port
+        --, "-b" ++ "115200"
+        , "-b" ++ "9600"
+        , "-D"
+        , "-Uflash:w:" ++ hex ++ ":i"
+        ])
 programmer (Just Leonardo) mcu hex = do
     b <- getManualBoot
     unless b $ do
