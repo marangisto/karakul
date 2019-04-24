@@ -19,8 +19,9 @@ import Data.List (isPrefixOf)
 main :: IO ()
 main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     usingConfigFile "build.mk"
+    let getBaseDir = fromMaybe "../.." <$> getConfig "BASE_DIR"
 
-    want [ buildDir </> "image" <.> "hex", buildDir </> "image" <.> "s" ]
+    want [ buildDir </> "image" <.> "s" ]
 
     buildDir </> "image" <.> "elf" %> \out -> do
         name <- fmap takeBaseName $ liftIO getCurrentDirectory
@@ -30,38 +31,54 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         let objs = [ buildDir </> name </> c <.> "o" | c <- cs ++ cpps ]
         libs <- (map (\l -> buildDir </> l </> l <.> "a")) <$> getLibs mcu
         need $ objs ++ libs
-        (command, flags) <- ld . toolChain <$> getMCU
+        baseDir <- getBaseDir
+        (command, flags) <- ld . toolChain baseDir <$> getMCU
         () <- cmd command (flags $ objs ++ libs) "-o" [ out ]
-        (command, flags) <- size . toolChain <$> getMCU
+        (command, flags) <- size . toolChain baseDir <$> getMCU
         cmd command (flags []) [ out ]
 
     buildDir </> "image" <.> "hex" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        (command, flags) <- objcopy . toolChain <$> getMCU
-        cmd command (flags []) [ elf ] [ out ]
+        baseDir <- getBaseDir
+        (command, flags) <- objcopy . toolChain baseDir <$> getMCU
+        cmd command (flags []) [ elf ] "-Oihex" [ out ]
+
+    buildDir </> "image" <.> "bin" %> \out -> do
+        let elf = out -<.> ".elf"
+        need [ elf ]
+        baseDir <- getBaseDir
+        (command, flags) <- objcopy . toolChain baseDir <$> getMCU
+        cmd command (flags []) [ elf ] "-Obinary" [ out ]
 
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        (command, flags) <- objdump . toolChain <$> getMCU
+        baseDir <- getBaseDir
+        (command, flags) <- objdump . toolChain baseDir <$> getMCU
         cmd (FileStdout out) command (flags []) "-S" [ elf ]
 
     buildDir <//> "*.a" %> \out -> do
+        baseDir <- getBaseDir
         let libName = takeBaseName out
-        let libDir = ".." </> libName
+        let libDir = baseDir </> libName </> "src"
         cs <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.c" ]
         cpps <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.cpp" ]
         let objs = [ buildDir </> libName </> c <.> "o" | c <- cs ++ cpps ]
         need objs
-        (command, flags) <- ar . toolChain <$> getMCU
+        (command, flags) <- ar . toolChain baseDir <$> getMCU
         cmd command (flags []) "rcs" out objs
 
     let compile tool out = do
-            let src = ".." </> dropDirectory1 (dropExtension out)
+            baseDir <- getBaseDir
+            this <- fmap takeBaseName $ liftIO getCurrentDirectory
+            let src | [ buildDir, lib, name ] <- splitDirectories out
+                    , lib /= this
+                    = baseDir </> lib </> "src" </> dropExtension name
+                    | otherwise = ".." </> dropDirectory1 (dropExtension out)
                 m = out -<.> "m"
             freq <- getF_CPU
-            (command, flags) <- tool . toolChain <$> getMCU
+            (command, flags) <- tool . toolChain baseDir <$> getMCU
             let include = [ "-I.." ]
             () <- cmd command (flags [])
                 [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
@@ -73,11 +90,15 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     buildDir <//> "*.cpp.o" %> compile cpp
 
     phony "upload" $ do
-        let hex = buildDir </> "image" <.> "hex"
-        need [ hex ]
+        baseDir <- getBaseDir
+        tc <- toolChain baseDir <$> getMCU
+        let payload = case format tc of
+                Hex -> buildDir </> "image" <.> "hex"
+                Binary -> buildDir </> "image" <.> "bin"
+        need [ payload ]
         board <- getBoard
         mcu <- getMCU
-        (command, flags) <- programmer board mcu hex
+        (command, flags) <- programmer board mcu payload
         cmd command (flags [])
 
     phony "ports" $ liftIO $ usbSerials Nothing Nothing >>= mapM_ print
@@ -86,10 +107,10 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
         putNormal $ "Cleaning files in " ++ buildDir
         removeFilesAfter buildDir [ "//*" ]
 
-toolChain :: MCU -> ToolChain
-toolChain mcu = case arch mcu of
-    AVR -> AVR.toolChain mcu
-    ARM -> ARM.toolChain mcu
+toolChain :: FilePath -> MCU -> ToolChain
+toolChain baseDir mcu = case arch mcu of
+    AVR -> AVR.toolChain baseDir mcu
+    ARM -> ARM.toolChain baseDir mcu
 
 filterGarbageFiles :: [FilePath] -> [FilePath]
 filterGarbageFiles = filter $ \p -> not $ any (`isPrefixOf` takeFileName p) ["#", ".#"]

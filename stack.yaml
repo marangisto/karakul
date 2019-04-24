@@ -39,7 +39,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
   - serialport-0.4.7
-  - Win32-2.6.2.0@sha256:ee9868bde66ce24b8022f3a1f809d5ae2f92aceecb31b9ec8e7d7620ce1077c9
+# - Win32-2.6.2.0@sha256:ee9868bde66ce24b8022f3a1f809d5ae2f92aceecb31b9ec8e7d7620ce1077c9
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -2,22 +2,35 @@
 module Internal.ARM (toolChain) where
 
 import Internal.ToolChain
+import System.FilePath
 
 samDir :: FilePath
 samDir = "c:/Users/marten/AppData/Local/Arduino15/packages/arduino/hardware/sam/1.6.11"
 
-toolChain :: MCU -> ToolChain
-toolChain mcu = ToolChain{..}
+toolChain :: FilePath -> MCU -> ToolChain
+toolChain baseDir mcu = ToolChain{..}
     where name = "arm-none-eabi-gcc"
-          cc = ("arm-none-eabi-gcc", \_ -> ccFlags mcu)
-          cpp = ("arm-none-eabi-g++", \_ -> ccFlags mcu ++ cppFlags mcu)
-          ld = ("arm-none-eabi-gcc", \objs -> ldFlags mcu objs)
+          cc = ("arm-none-eabi-gcc", \_ -> ccFlags baseDir mcu)
+          cpp = ("arm-none-eabi-g++", \_ -> ccFlags baseDir mcu ++ cppFlags mcu)
+          ld = ("arm-none-eabi-gcc", \objs -> ldFlags baseDir mcu objs)
           ar = ("arm-none-eabi-ar", \_ -> [])
           objcopy = ("arm-none-eabi-objcopy", \_ -> copyFlags mcu)
-          objdump = ("arm-none-eabi-objdump", \_ -> [])
+          objdump = ("arm-none-eabi-objdump", \_ -> [ "--disassemble-all" ])
           size = ("arm-none-eabi-size", \_ -> [])
+          format = Binary
 
-ccFlags SAM3X8E =
+ccFlags baseDir STM32F051 =
+    [ "-DSTM32F0"
+    , "-DSTM32F0x1"
+    , "-DSTM32F05x"
+    , "-DSTM32F051"
+    , "-mcpu=cortex-m0"
+    , "-mthumb"
+    , "-I" <> baseDir </> "stm32f0/include"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    ]
+ccFlags _ SAM3X8E =
     [ "-D__SAM3X8E__"
     , "-mcpu=cortex-m3"
     , "-mthumb"
@@ -30,7 +43,7 @@ ccFlags SAM3X8E =
     , "-ffunction-sections"
     , "-fdata-sections"
     ]
-ccFlags mcu =
+ccFlags _ mcu =
     [ "-ffunction-sections"
     , "-fdata-sections"
     , "-nostdlib"
@@ -47,6 +60,12 @@ ccFlags mcu =
     , "-I../Teensy3"
     ]
 
+cppFlags STM32F051 =
+    [ "-std=gnu++17"
+    , "-fno-threadsafe-statics"
+    , "-fno-exceptions"
+    , "-fno-rtti"
+    ]
 cppFlags SAM3X8E =
     [ "-std=gnu++11"
     , "-fno-threadsafe-statics"
@@ -61,7 +80,22 @@ cppFlags MK64FX512 =
     ]
 cppFlags MK66FX1M0 = cppFlags MK64FX512
 
-ldFlags SAM3X8E objs =
+ldFlags baseDir STM32F051 objs =
+    [ "-mcpu=cortex-m0"
+    , "-mthumb"
+    , "-Wl,--gc-sections"
+    , "-T" ++ baseDir </> "stm32f0/link/stm32f051.ld"
+    , "-Wl,--check-sections"
+    , "-Wl,--entry=Reset_HDLR"
+    , "-Wl,--unresolved-symbols=report-all"
+    , "-Wl,--warn-common"
+    , "-Wl,--warn-section-align"
+    , "-Wl,--start-group"
+    ] ++ objs ++
+    [ "-Wl,--end-group"
+    , "-lm"
+    ]
+ldFlags _ SAM3X8E objs =
     [ "-mcpu=cortex-m3"
     , "-mthumb"
     , "-Wl,--gc-sections"
@@ -88,8 +122,8 @@ ldFlags SAM3X8E objs =
     , "-lm"
     , "-gcc"
     ]
-ldFlags mcu@MK64FX512 objs = ("-T../Teensy3/" ++ mcuStr mcu ++ ".ld") : ldFlagsMK6 objs  -- FIXME: need this file somewhere!
-ldFlags mcu@MK66FX1M0 objs = ("-T../Teensy3/" ++ mcuStr mcu ++ ".ld") : ldFlagsMK6 objs   -- FIXME: need this file somewhere!
+ldFlags _ mcu@MK64FX512 objs = ("-T../Teensy3/" ++ mcuStr mcu ++ ".ld") : ldFlagsMK6 objs  -- FIXME: need this file somewhere!
+ldFlags _ mcu@MK66FX1M0 objs = ("-T../Teensy3/" ++ mcuStr mcu ++ ".ld") : ldFlagsMK6 objs   -- FIXME: need this file somewhere!
 
 ldFlagsMK6 objs =
     [ "-Wl,--gc-sections,--relax,--defsym=__rtc_localtime=1476636451"
@@ -100,11 +134,7 @@ ldFlagsMK6 objs =
     , "-fsingle-precision-constant"
     ] ++ objs
 
-copyFlags SAM3X8E =
-    [ "-Obinary"
-    ]
 copyFlags _ =
-    [ "-Oihex"
-    , "-R.eeprom"
+    [
     ]
 

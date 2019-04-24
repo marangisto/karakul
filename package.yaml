@@ -25,7 +25,7 @@ dependencies:
   - serialport
   - shake
   - split
-  - Win32
+# - Win32
   - filepath
   - directory
 
