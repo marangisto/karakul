@@ -79,7 +79,7 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
                 m = out -<.> "m"
             freq <- getF_CPU
             (command, flags) <- tool . toolChain baseDir <$> getMCU
-            let include = [ "-I.." ]
+            let include = [ "-I..", "-I" <> dropDirectory1 baseDir </> "include" ]
             () <- cmd command (flags [])
                 [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
                 ("-DF_CPU=" ++ show (round freq) ++ "L")
