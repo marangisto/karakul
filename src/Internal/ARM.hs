@@ -26,7 +26,6 @@ ccFlags baseDir STM32F051 =
     , "-DSTM32F051"
     , "-mcpu=cortex-m0"
     , "-mthumb"
-    , "-I" <> baseDir </> "stm32f0/include"
     , "-ffunction-sections"
     , "-fdata-sections"
     ]
