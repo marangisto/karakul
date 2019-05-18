@@ -12,13 +12,16 @@ import Development.Shake.FilePath
 import Development.Shake.Config
 import Development.Shake.Util
 import System.FilePath (takeBaseName)
-import System.Directory (getCurrentDirectory)
+import System.Directory as D (getCurrentDirectory, doesFileExist)
 import Data.Maybe (fromMaybe)
 import Data.List (isPrefixOf)
 
 main :: IO ()
-main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
-    usingConfigFile "build.mk"
+main = do
+  let configFile = "build.mk"
+  exists <- D.doesFileExist configFile
+  if exists then shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
+    usingConfigFile configFile
     let getBaseDir = fromMaybe "../.." <$> getConfig "BASE_DIR"
 
     want [ buildDir </> "image" <.> "s" ]
@@ -107,6 +110,9 @@ main = shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     phony "clean" $ do
         putNormal $ "Cleaning files in " ++ buildDir
         removeFilesAfter buildDir [ "//*" ]
+  else
+    putStrLn $ "no " <> configFile <> " present, bailing out..."
+
 
 toolChain :: FilePath -> MCU -> ToolChain
 toolChain baseDir mcu = case arch mcu of
