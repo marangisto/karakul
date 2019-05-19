@@ -82,6 +82,7 @@ cppFlags MK66FX1M0 = cppFlags MK64FX512
 ldFlags baseDir STM32F051 objs =
     [ "-mcpu=cortex-m0"
     , "-mthumb"
+    , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
     , "-T" ++ baseDir </> "stm32f0/link/stm32f051.ld"
     , "-Wl,--check-sections"
