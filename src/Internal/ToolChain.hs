@@ -14,6 +14,8 @@ data MCU
     | MK66FX1M0
     | SAM3X8E
     | STM32F051
+    | STM32F411
+    | STM32F412
     deriving (Read, Show)
 
 mcuStr :: MCU -> String
@@ -33,6 +35,8 @@ arch MK64FX512      = ARM
 arch MK66FX1M0      = ARM
 arch SAM3X8E        = ARM
 arch STM32F051      = ARM
+arch STM32F411      = ARM
+arch STM32F412      = ARM
 
 data Board
     = Uno

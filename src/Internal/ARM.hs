@@ -29,6 +29,16 @@ ccFlags baseDir STM32F051 =
     , "-ffunction-sections"
     , "-fdata-sections"
     ]
+ccFlags baseDir STM32F411 =
+    [ "-DSTM32F4"
+    , "-DSTM32F4x1"
+    , "-DSTM32F41x"
+    , "-DSTM32F411"
+    , "-mcpu=cortex-m4"
+    , "-mthumb"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    ]
 ccFlags _ SAM3X8E =
     [ "-D__SAM3X8E__"
     , "-mcpu=cortex-m3"
@@ -59,25 +69,12 @@ ccFlags _ mcu =
     , "-I../Teensy3"
     ]
 
-cppFlags STM32F051 =
+cppFlags _ =
     [ "-std=gnu++17"
     , "-fno-threadsafe-statics"
     , "-fno-exceptions"
     , "-fno-rtti"
     ]
-cppFlags SAM3X8E =
-    [ "-std=gnu++11"
-    , "-fno-threadsafe-statics"
-    , "-fno-exceptions"
-    , "-fno-rtti"
-    ]
-cppFlags MK64FX512 =
-    [ "-std=gnu++11"
-    , "-felide-constructors"
-    , "-fno-exceptions"
-    , "-fno-rtti"
-    ]
-cppFlags MK66FX1M0 = cppFlags MK64FX512
 
 ldFlags baseDir STM32F051 objs =
     [ "-mcpu=cortex-m0"
@@ -85,6 +82,22 @@ ldFlags baseDir STM32F051 objs =
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
     , "-T" ++ baseDir </> "stm32f0/link/stm32f051.ld"
+    , "-Wl,--check-sections"
+    , "-Wl,--entry=Reset_HDLR"
+    , "-Wl,--unresolved-symbols=report-all"
+    , "-Wl,--warn-common"
+    , "-Wl,--warn-section-align"
+    , "-Wl,--start-group"
+    ] ++ objs ++
+    [ "-Wl,--end-group"
+    , "-lm"
+    ]
+ldFlags baseDir STM32F411 objs =
+    [ "-mcpu=cortex-m4"
+    , "-mthumb"
+    , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
+    , "-Wl,--gc-sections"
+    , "-T" ++ baseDir </> "stm32f4/link/stm32f411.ld"
     , "-Wl,--check-sections"
     , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"
