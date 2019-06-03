@@ -32,6 +32,7 @@ ccFlags baseDir STM32F051 =
 ccFlags baseDir STM32F103 =
     [ "-DSTM32F1"
     , "-DSTM32F103"
+    , "-DSTM32F103xx"
     , "-mcpu=cortex-m3"
     , "-mthumb"
     , "-ffunction-sections"
