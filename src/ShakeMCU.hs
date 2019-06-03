@@ -65,8 +65,8 @@ main = do
         baseDir <- getBaseDir
         let libName = takeBaseName out
         let libDir = baseDir </> libName </> "src"
-        cs <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.c" ]
-        cpps <- filterGarbageFiles <$> getDirectoryFiles libDir [ "//*.cpp" ]
+        cs <- filterGarbageFiles <$> getDirectoryFiles libDir [ "/*.c" ]
+        cpps <- filterGarbageFiles <$> getDirectoryFiles libDir [ "/*.cpp" ]
         let objs = [ buildDir </> libName </> c <.> "o" | c <- cs ++ cpps ]
         need objs
         (command, flags) <- ar . toolChain baseDir <$> getMCU
