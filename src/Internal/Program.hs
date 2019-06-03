@@ -17,6 +17,12 @@ programmer Nothing STM32F051 bin = return
         , bin
         , "0x8000000"
         ])
+programmer Nothing STM32F103 bin = return
+    ("st-flash", \_ ->
+        [ "write"
+        , bin
+        , "0x8000000"
+        ])
 programmer Nothing STM32F411 bin = return
     ("st-flash", \_ ->
         [ "write"

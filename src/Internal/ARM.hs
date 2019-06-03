@@ -29,6 +29,14 @@ ccFlags baseDir STM32F051 =
     , "-ffunction-sections"
     , "-fdata-sections"
     ]
+ccFlags baseDir STM32F103 =
+    [ "-DSTM32F1"
+    , "-DSTM32F103"
+    , "-mcpu=cortex-m3"
+    , "-mthumb"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    ]
 ccFlags baseDir STM32F411 =
     [ "-DSTM32F4"
     , "-DSTM32F4x1"
@@ -82,6 +90,22 @@ ldFlags baseDir STM32F051 objs =
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
     , "-T" ++ baseDir </> "stm32f0/link/stm32f051.ld"
+    , "-Wl,--check-sections"
+    , "-Wl,--entry=Reset_HDLR"
+    , "-Wl,--unresolved-symbols=report-all"
+    , "-Wl,--warn-common"
+    , "-Wl,--warn-section-align"
+    , "-Wl,--start-group"
+    ] ++ objs ++
+    [ "-Wl,--end-group"
+    , "-lm"
+    ]
+ldFlags baseDir STM32F103 objs =
+    [ "-mcpu=cortex-m3"
+    , "-mthumb"
+    , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
+    , "-Wl,--gc-sections"
+    , "-T" ++ baseDir </> "stm32f0/link/stm32f103.ld"
     , "-Wl,--check-sections"
     , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"
