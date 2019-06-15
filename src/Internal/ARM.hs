@@ -90,7 +90,7 @@ ldFlags baseDir STM32F051 objs =
     , "-mthumb"
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
-    , "-T" ++ baseDir </> "stm32f0/link/stm32f051.ld"
+    , "-T" ++ baseDir </> "hal/link/stm32f051.ld"
     , "-Wl,--check-sections"
     , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"
@@ -106,7 +106,7 @@ ldFlags baseDir STM32F103 objs =
     , "-mthumb"
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
-    , "-T" ++ baseDir </> "stm32f0/link/stm32f103.ld"
+    , "-T" ++ baseDir </> "hal/link/stm32f103.ld"
     , "-Wl,--check-sections"
     , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"
@@ -122,7 +122,7 @@ ldFlags baseDir STM32F411 objs =
     , "-mthumb"
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
-    , "-T" ++ baseDir </> "stm32f4/link/stm32f411.ld"
+    , "-T" ++ baseDir </> "hal/link/stm32f411.ld"
     , "-Wl,--check-sections"
     , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"
