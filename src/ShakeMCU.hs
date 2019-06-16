@@ -88,6 +88,7 @@ main = do
                 [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include
                 ("-DF_CPU=" ++ show (round freq) ++ "L")
                 [ src ] "-o" [ out ] "-MMD -MF" [ m ]
+                ("-Wa,-adhln=" ++ out -<.> "s")
             needMakefileDependencies m
 
     buildDir <//> "*.c.o" %> compile cc
