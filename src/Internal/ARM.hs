@@ -10,8 +10,8 @@ samDir = "c:/Users/marten/AppData/Local/Arduino15/packages/arduino/hardware/sam/
 toolChain :: FilePath -> MCU -> ToolChain
 toolChain baseDir mcu = ToolChain{..}
     where name = "arm-none-eabi-gcc"
-          cc = ("arm-none-eabi-gcc", \_ -> ccFlags baseDir mcu)
-          cpp = ("arm-none-eabi-g++", \_ -> ccFlags baseDir mcu ++ cppFlags mcu)
+          cc = ("arm-none-eabi-gcc", \_ -> ccFlags mcu)
+          cpp = ("arm-none-eabi-g++", \_ -> ccFlags mcu ++ cppFlags mcu)
           ld = ("arm-none-eabi-gcc", \objs -> ldFlags baseDir mcu objs)
           ar = ("arm-none-eabi-ar", \_ -> [])
           objcopy = ("arm-none-eabi-objcopy", \_ -> copyFlags mcu)
@@ -19,53 +19,36 @@ toolChain baseDir mcu = ToolChain{..}
           size = ("arm-none-eabi-size", \_ -> [])
           format = Binary
 
-ccFlags baseDir STM32F051 =
-    [ "-DSTM32F0"
-    , "-DSTM32F0x1"
-    , "-DSTM32F05x"
-    , "-DSTM32F051"
+ccFlags mcu = mcuFlags mcu ++
+    [ "-mthumb"
+    , "-ffunction-sections"
+    , "-fdata-sections"
+    ]
+
+mcuFlags STM32F051 =
+    [ "-DSTM32F051"
     , "-mcpu=cortex-m0"
-    , "-mthumb"
-    , "-ffunction-sections"
-    , "-fdata-sections"
     ]
-ccFlags baseDir STM32F103 =
-    [ "-DSTM32F1"
-    , "-DSTM32F103"
-    , "-DSTM32F103xx"
+mcuFlags STM32F103 =
+    [ "-DSTM32F103"
     , "-mcpu=cortex-m3"
-    , "-mthumb"
-    , "-ffunction-sections"
-    , "-fdata-sections"
     ]
-ccFlags baseDir STM32F411 =
-    [ "-DSTM32F4"
-    , "-DSTM32F4x1"
-    , "-DSTM32F41x"
-    , "-DSTM32F411"
+mcuFlags STM32F411 =
+    [ "-DSTM32F411"
     , "-mcpu=cortex-m4"
-    , "-mthumb"
-    , "-ffunction-sections"
-    , "-fdata-sections"
     ]
-ccFlags _ SAM3X8E =
+mcuFlags SAM3X8E =
     [ "-D__SAM3X8E__"
     , "-mcpu=cortex-m3"
-    , "-mthumb"
     , "-I../ARM"
     , "-I" ++ samDir ++ "/system/CMSIS/CMSIS/include"
     , "-I" ++ samDir ++ "/system/CMSIS/Device/ATMEL"
     , "-I" ++ samDir ++ "/system/CMSIS/Device/ATMEL/sam3xa/include"
     , "-I" ++ samDir ++ "/system/libsam"
     , "-I" ++ samDir ++ "/cores/arduino"
-    , "-ffunction-sections"
-    , "-fdata-sections"
     ]
-ccFlags _ mcu =
-    [ "-ffunction-sections"
-    , "-fdata-sections"
-    , "-nostdlib"
-    , "-mthumb"
+mcuFlags mcu =
+    [ "-nostdlib"
     , "-mcpu=cortex-m4"
     , "-mfloat-abi=hard"
     , "-mfpu=fpv4-sp-d16"
