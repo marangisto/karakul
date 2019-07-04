@@ -35,6 +35,12 @@ programmer Nothing STM32F412 bin = return
         , bin
         , "0x8000000"
         ])
+programmer Nothing STM32G070 bin = return
+    ("st-flash", \_ ->
+        [ "write"
+        , bin
+        , "0x8000000"
+        ])
 programmer Nothing mcu hex = return
     ("atprogram", \_ ->
         [ "-t"
