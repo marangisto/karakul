@@ -41,6 +41,10 @@ mcuFlags STM32G070 =
     [ "-DSTM32G070"
     , "-mcpu=cortex-m0plus" -- .small-multiply"
     ]
+mcuFlags STM32G431 =
+    [ "-DSTM32G431"
+    , "-mcpu=cortex-m4"
+    ]
 mcuFlags SAM3X8E =
     [ "-D__SAM3X8E__"
     , "-mcpu=cortex-m3"
@@ -126,6 +130,22 @@ ldFlags baseDir STM32G070 objs =
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
     , "-T" ++ baseDir </> "hal/link/stm32g070.ld"
+    , "-Wl,--check-sections"
+    , "-Wl,--entry=Reset_HDLR"
+    , "-Wl,--unresolved-symbols=report-all"
+    , "-Wl,--warn-common"
+    , "-Wl,--warn-section-align"
+    , "-Wl,--start-group"
+    ] ++ objs ++
+    [ "-Wl,--end-group"
+    , "-lm"
+    ]
+ldFlags baseDir STM32G431 objs =
+    [ "-mcpu=cortex-m4"
+    , "-mthumb"
+    , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
+    , "-Wl,--gc-sections"
+    , "-T" ++ baseDir </> "hal/link/stm32g431.ld"
     , "-Wl,--check-sections"
     , "-Wl,--entry=Reset_HDLR"
     , "-Wl,--unresolved-symbols=report-all"

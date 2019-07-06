@@ -18,6 +18,7 @@ data MCU
     | STM32F411
     | STM32F412
     | STM32G070
+    | STM32G431
     deriving (Read, Show)
 
 mcuStr :: MCU -> String
@@ -41,6 +42,7 @@ arch STM32F103      = ARM
 arch STM32F411      = ARM
 arch STM32F412      = ARM
 arch STM32G070      = ARM
+arch STM32G431      = ARM
 
 data Board
     = Uno
