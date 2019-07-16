@@ -24,10 +24,13 @@ programmer Nothing STM32F103 bin = return
         , "0x8000000"
         ])
 programmer Nothing STM32F411 bin = return
-    ("st-flash", \_ ->
-        [ "write"
+    ("STM32_Programmer_CLI", \_ ->
+        [ "--connect port=SWD mode=UR"
+        , "--write"
         , bin
         , "0x8000000"
+        , "--verify"
+        , "-hardRst"
         ])
 programmer Nothing STM32F412 bin = return
     ("st-flash", \_ ->
