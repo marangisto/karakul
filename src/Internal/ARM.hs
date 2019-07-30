@@ -44,6 +44,9 @@ mcuFlags STM32G070 =
 mcuFlags STM32G431 =
     [ "-DSTM32G431"
     , "-mcpu=cortex-m4"
+    , "-mfloat-abi=hard"
+    , "-mfpu=fpv4-sp-d16"
+    , "-fsingle-precision-constant"
     ]
 mcuFlags SAM3X8E =
     [ "-D__SAM3X8E__"
@@ -142,6 +145,9 @@ ldFlags baseDir STM32G070 objs =
     ]
 ldFlags baseDir STM32G431 objs =
     [ "-mcpu=cortex-m4"
+    , "-mfloat-abi=hard"
+    , "-mfpu=fpv4-sp-d16"
+    , "-fsingle-precision-constant"
     , "-mthumb"
     , "-specs=nosys.specs"  -- to get gcc _sbrk, etc to link
     , "-Wl,--gc-sections"
