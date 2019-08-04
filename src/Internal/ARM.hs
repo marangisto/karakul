@@ -43,6 +43,8 @@ mcuFlags STM32G070 =
     ]
 mcuFlags STM32G431 =
     [ "-DSTM32G431"
+    , "-DSTM32G431xx"
+    , "-DUSE_FULL_LL_DRIVER"
     , "-mcpu=cortex-m4"
     , "-mfloat-abi=hard"
     , "-mfpu=fpv4-sp-d16"
