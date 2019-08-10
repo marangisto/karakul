@@ -27,6 +27,9 @@ getLibs mcu = fromMaybe (defLibs mcu $ arch mcu) . fmap words <$> getConfig "LIB
     where defLibs _ AVR = [ "AVR" ]
           defLibs _ ARM = [ "hal" ]
 
+getDefs :: Action [String]
+getDefs = maybe [] words <$> getConfig "DEFS"
+
 getPort :: Action (Maybe FilePath)
 getPort = getConfig "PORT"
 
