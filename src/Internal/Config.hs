@@ -30,6 +30,22 @@ getLibs mcu = fromMaybe (defLibs mcu $ arch mcu) . fmap words <$> getConfig "LIB
 getDefs :: Action [String]
 getDefs = maybe [] words <$> getConfig "DEFS"
 
+getBaseDir :: Action FilePath
+getBaseDir = fromMaybe "../.." <$> getConfig "BASE_DIR"
+
+getLink :: Action FilePath
+getLink = do
+    mfp <- getConfig "LINK"
+    case mfp of
+        Just fp -> return fp
+        Nothing -> do
+            mcu <- getMCU
+            baseDir <- getBaseDir
+            return $ baseDir </> "hal/link" </> mcuStr mcu <.> "ld"
+
+getEntry :: Action FilePath
+getEntry = fromMaybe "__reset" <$> getConfig "ENTRY"
+
 getPort :: Action (Maybe FilePath)
 getPort = getConfig "PORT"
 

@@ -65,6 +65,13 @@ boardMCU TrinketPro     = (ATMEGA328P,      16e6)
 boardMCU Teensy35       = (MK64FX512,       120e6)
 boardMCU Teensy36       = (MK66FX1M0,       180e6)
 
+data ToolConfig = ToolConfig
+    { mcu       :: MCU
+    , baseDir   :: FilePath
+    , link      :: FilePath
+    , entry     :: String
+    }
+
 data Format = Binary | Hex
 
 type Tool = (String, [String] -> [String])

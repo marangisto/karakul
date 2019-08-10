@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 module ShakeMCU (main) where
 
 import Internal.Config
@@ -22,7 +23,6 @@ main = do
   exists <- D.doesFileExist configFile
   if exists then shakeArgs shakeOptions{ shakeFiles = buildDir } $ do
     usingConfigFile configFile
-    let getBaseDir = fromMaybe "../.." <$> getConfig "BASE_DIR"
 
     want [ buildDir </> "image" <.> "s" ]
 
@@ -35,31 +35,27 @@ main = do
         let objs = [ buildDir </> name </> c <.> "o" | c <- cs ++ cpps ++ asms ]
         libs <- (map (\l -> buildDir </> l </> l <.> "a")) <$> getLibs mcu
         need $ objs ++ libs
-        baseDir <- getBaseDir
-        (command, flags) <- ld . toolChain baseDir <$> getMCU
+        (command, flags) <- ld <$> toolChain
         () <- cmd command (flags $ objs ++ libs) "-o" [ out ]
-        (command, flags) <- size . toolChain baseDir <$> getMCU
+        (command, flags) <- size <$> toolChain
         cmd command (flags []) [ out ]
 
     buildDir </> "image" <.> "hex" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        baseDir <- getBaseDir
-        (command, flags) <- objcopy . toolChain baseDir <$> getMCU
+        (command, flags) <- objcopy <$> toolChain
         cmd command (flags []) [ elf ] "-Oihex" [ out ]
 
     buildDir </> "image" <.> "bin" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        baseDir <- getBaseDir
-        (command, flags) <- objcopy . toolChain baseDir <$> getMCU
+        (command, flags) <- objcopy <$> toolChain
         cmd command (flags []) [ elf ] "-Obinary" [ out ]
 
     buildDir </> "image" <.> "s" %> \out -> do
         let elf = out -<.> ".elf"
         need [ elf ]
-        baseDir <- getBaseDir
-        (command, flags) <- objdump . toolChain baseDir <$> getMCU
+        (command, flags) <- objdump <$> toolChain
         cmd (FileStdout out) command (flags []) "-S" [ elf ]
 
     buildDir <//> "*.a" %> \out -> do
@@ -70,7 +66,7 @@ main = do
         cpps <- filterGarbageFiles <$> getDirectoryFiles libDir [ "/*.cpp" ]
         let objs = [ buildDir </> libName </> c <.> "o" | c <- cs ++ cpps ]
         need objs
-        (command, flags) <- ar . toolChain baseDir <$> getMCU
+        (command, flags) <- ar <$> toolChain
         cmd command (flags []) "rcs" out objs
 
     let compile tool out = do
@@ -82,7 +78,7 @@ main = do
                     | otherwise = ".." </> dropDirectory1 (dropExtension out)
                 m = out -<.> "m"
             freq <- getF_CPU
-            (command, flags) <- tool . toolChain baseDir <$> getMCU
+            (command, flags) <- tool <$> toolChain
             libs <- getLibs =<< getMCU
             defs <- getDefs
             let include = [ "-I" <> baseDir </> lib </> "include" | lib <- libs ] ++ [ "-I." ]
@@ -99,8 +95,7 @@ main = do
     buildDir <//> "*.asm.o" %> compile asm
 
     phony "upload" $ do
-        baseDir <- getBaseDir
-        tc <- toolChain baseDir <$> getMCU
+        tc <- toolChain
         let payload = case format tc of
                 Hex -> buildDir </> "image" <.> "hex"
                 Binary -> buildDir </> "image" <.> "bin"
@@ -118,11 +113,15 @@ main = do
   else
     putStrLn $ "no " <> configFile <> " present, bailing out..."
 
-
-toolChain :: FilePath -> MCU -> ToolChain
-toolChain baseDir mcu = case arch mcu of
-    AVR -> AVR.toolChain baseDir mcu
-    ARM -> ARM.toolChain baseDir mcu
+toolChain :: Action ToolChain
+toolChain = do
+    mcu <- getMCU
+    baseDir <- getBaseDir
+    entry <- getEntry
+    link <- getLink
+    return $ case arch mcu of
+        AVR -> AVR.toolChain ToolConfig{..}
+        ARM -> ARM.toolChain ToolConfig{..}
 
 filterGarbageFiles :: [FilePath] -> [FilePath]
 filterGarbageFiles = filter $ \p -> not $ any (`isPrefixOf` takeFileName p) ["#", ".#"]
