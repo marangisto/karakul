@@ -73,6 +73,7 @@ data ToolChain = ToolChain
     { name      :: String
     , cc        :: Tool
     , cpp       :: Tool
+    , asm       :: Tool
     , ld        :: Tool
     , ar        :: Tool
     , objcopy   :: Tool

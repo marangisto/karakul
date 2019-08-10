@@ -12,6 +12,7 @@ toolChain baseDir mcu = ToolChain{..}
     where name = "arm-none-eabi-gcc"
           cc = ("arm-none-eabi-gcc", \_ -> ccFlags mcu)
           cpp = ("arm-none-eabi-g++", \_ -> ccFlags mcu ++ cppFlags mcu)
+          asm = ("arm-none-eabi-gcc", \_ -> ccFlags mcu ++ asmFlags mcu)
           ld = ("arm-none-eabi-gcc", \objs -> ldFlags baseDir mcu objs)
           ar = ("arm-none-eabi-ar", \_ -> [])
           objcopy = ("arm-none-eabi-objcopy", \_ -> copyFlags mcu)
@@ -77,6 +78,10 @@ cppFlags _ =
     , "-fno-threadsafe-statics"
     , "-fno-exceptions"
     , "-fno-rtti"
+    ]
+
+asmFlags _ =
+    [ "-xassembler-with-cpp"
     ]
 
 ldFlags baseDir STM32F051 objs =

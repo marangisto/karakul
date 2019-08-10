@@ -9,6 +9,7 @@ toolChain _ mcu = ToolChain{..}
     where name = "avr-gcc"
           cc = ("avr-gcc", \_ -> ccFlags mcu)
           cpp = ("avr-g++", \_ -> cppFlags mcu)
+          asm = ("avr-gcc", \_ -> cppFlags mcu ++ asmFlags mcu)
           ld = ("avr-gcc", \xs -> ldFlags mcu ++ xs)
           ar = ("avr-ar", \_ -> [])
           objcopy = ("avr-objcopy", \_ -> copyFlags mcu)
@@ -26,6 +27,10 @@ cppFlags mcu = ccFlags mcu ++
     [ "-std=c++11"
     , "-fno-exceptions"
     , "-fno-threadsafe-statics"
+    ]
+
+asmFlags mcu =
+    [ "-xassembler-with-cpp"
     ]
 
 ldFlags mcu =

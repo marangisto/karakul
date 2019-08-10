@@ -14,7 +14,7 @@ import Development.Shake.Util
 import System.FilePath (takeBaseName)
 import System.Directory as D (getCurrentDirectory, doesFileExist)
 import Data.Maybe (fromMaybe)
-import Data.List (isPrefixOf)
+import Data.List (isPrefixOf, isInfixOf)
 
 main :: IO ()
 main = do
@@ -30,8 +30,9 @@ main = do
         name <- fmap takeBaseName $ liftIO getCurrentDirectory
         cs <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.c" ]
         cpps <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.cpp" ]
+        asms <- filterGarbageFiles <$> getDirectoryFiles "" [ "//*.asm" ]
         mcu <- getMCU
-        let objs = [ buildDir </> name </> c <.> "o" | c <- cs ++ cpps ]
+        let objs = [ buildDir </> name </> c <.> "o" | c <- cs ++ cpps ++ asms ]
         libs <- (map (\l -> buildDir </> l </> l <.> "a")) <$> getLibs mcu
         need $ objs ++ libs
         baseDir <- getBaseDir
@@ -95,6 +96,7 @@ main = do
 
     buildDir <//> "*.c.o" %> compile cc
     buildDir <//> "*.cpp.o" %> compile cpp
+    buildDir <//> "*.asm.o" %> compile asm
 
     phony "upload" $ do
         baseDir <- getBaseDir
