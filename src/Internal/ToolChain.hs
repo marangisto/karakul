@@ -19,7 +19,7 @@ data MCU
     | STM32F412
     | STM32G070
     | STM32G431
-    deriving (Read, Show)
+    deriving (Eq, Read, Show)
 
 mcuStr :: MCU -> String
 mcuStr = map toLower . show
