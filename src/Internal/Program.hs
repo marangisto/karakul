@@ -11,15 +11,10 @@ import Control.Concurrent
 import Control.Monad
 
 programmer :: Maybe Board -> MCU -> FilePath -> Action Tool
-programmer Nothing STM32F051 bin = return
-    ("st-flash", \_ ->
-        [ "write"
-        , bin
-        , "0x8000000"
-        ])
 programmer Nothing mcu bin
     | mcu `elem`
-        [ STM32F103
+        [ STM32F051
+        , STM32F103
         , STM32F411
         , STM32F412
         , STM32G070
