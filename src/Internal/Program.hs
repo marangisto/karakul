@@ -17,6 +17,8 @@ programmer Nothing mcu bin
         , STM32F103
         , STM32F411
         , STM32F412
+        , STM32F767
+        , STM32H743
         , STM32G070
         , STM32G431
         ]

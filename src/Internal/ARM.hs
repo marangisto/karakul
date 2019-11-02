@@ -38,6 +38,14 @@ mcuFlags STM32F411 =
     [ "-DSTM32F411"
     , "-mcpu=cortex-m4"
     ]
+mcuFlags STM32F767 =
+    [ "-DSTM32F767"
+    , "-mcpu=cortex-m7"
+    ]
+mcuFlags STM32H743 =
+    [ "-DSTM32H743"
+    , "-mcpu=cortex-m7"
+    ]
 mcuFlags STM32G070 =
     [ "-DSTM32G070"
     , "-mcpu=cortex-m0plus" -- .small-multiply"
@@ -103,6 +111,8 @@ ldFlags ToolConfig{..} objs = ldFlagsMCU mcu ++
 ldFlagsMCU STM32F051 = [ "-mcpu=cortex-m0" ]
 ldFlagsMCU STM32F103 = [ "-mcpu=cortex-m3" ]
 ldFlagsMCU STM32F411 = [ "-mcpu=cortex-m4" ]
+ldFlagsMCU STM32F767 = [ "-mcpu=cortex-m7" ]
+ldFlagsMCU STM32H743 = [ "-mcpu=cortex-m7" ]
 ldFlagsMCU STM32G070 = [ "-mcpu=cortex-m0plus" ]
 ldFlagsMCU STM32G431 = [ "-mcpu=cortex-m4", "-mfloat-abi=hard", "-mfpu=fpv4-sp-d16", "-fsingle-precision-constant" ]
 ldFlagsMCU SAM3X8E = [ "-mcpu=cortex-m3" ]

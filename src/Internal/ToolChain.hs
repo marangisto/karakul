@@ -17,6 +17,8 @@ data MCU
     | STM32F103
     | STM32F411
     | STM32F412
+    | STM32F767
+    | STM32H743
     | STM32G070
     | STM32G431
     deriving (Eq, Read, Show)
@@ -41,6 +43,8 @@ arch STM32F051      = ARM
 arch STM32F103      = ARM
 arch STM32F411      = ARM
 arch STM32F412      = ARM
+arch STM32F767      = ARM
+arch STM32H743      = ARM
 arch STM32G070      = ARM
 arch STM32G431      = ARM
 
