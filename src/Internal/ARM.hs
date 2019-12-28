@@ -30,6 +30,10 @@ mcuFlags STM32F051 =
     [ "-DSTM32F051"
     , "-mcpu=cortex-m0"
     ]
+mcuFlags STM32F072 =
+    [ "-DSTM32F072"
+    , "-mcpu=cortex-m0"
+    ]
 mcuFlags STM32F103 =
     [ "-DSTM32F103"
     , "-mcpu=cortex-m3"
@@ -109,6 +113,7 @@ ldFlags ToolConfig{..} objs = ldFlagsMCU mcu ++
     ]
 
 ldFlagsMCU STM32F051 = [ "-mcpu=cortex-m0" ]
+ldFlagsMCU STM32F072 = [ "-mcpu=cortex-m0" ]
 ldFlagsMCU STM32F103 = [ "-mcpu=cortex-m3" ]
 ldFlagsMCU STM32F411 = [ "-mcpu=cortex-m4" ]
 ldFlagsMCU STM32F767 = [ "-mcpu=cortex-m7" ]

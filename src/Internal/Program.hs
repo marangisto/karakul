@@ -14,6 +14,7 @@ programmer :: Maybe Board -> MCU -> FilePath -> Action Tool
 programmer Nothing mcu bin
     | mcu `elem`
         [ STM32F051
+        , STM32F072
         , STM32F103
         , STM32F411
         , STM32F412
