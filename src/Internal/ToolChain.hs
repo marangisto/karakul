@@ -14,6 +14,7 @@ data MCU
     | MK66FX1M0
     | SAM3X8E
     | STM32F051
+    | STM32F072
     | STM32F103
     | STM32F411
     | STM32F412
@@ -40,6 +41,7 @@ arch MK64FX512      = ARM
 arch MK66FX1M0      = ARM
 arch SAM3X8E        = ARM
 arch STM32F051      = ARM
+arch STM32F072      = ARM
 arch STM32F103      = ARM
 arch STM32F411      = ARM
 arch STM32F412      = ARM
