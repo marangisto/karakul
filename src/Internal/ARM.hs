@@ -28,34 +28,42 @@ ccFlags ToolConfig{..} = mcuFlags mcu ++
 
 mcuFlags STM32F051 =
     [ "-DSTM32F051"
+    , "-DSTM32F0"
     , "-mcpu=cortex-m0"
     ]
 mcuFlags STM32F072 =
     [ "-DSTM32F072"
+    , "-DSTM32F0"
     , "-mcpu=cortex-m0"
     ]
 mcuFlags STM32F103 =
     [ "-DSTM32F103"
+    , "-DSTM32F1"
     , "-mcpu=cortex-m3"
     ]
 mcuFlags STM32F411 =
     [ "-DSTM32F411"
+    , "-DSTM32F4"
     , "-mcpu=cortex-m4"
     ]
 mcuFlags STM32F767 =
     [ "-DSTM32F767"
+    , "-DSTM32F7"
     , "-mcpu=cortex-m7"
     ]
 mcuFlags STM32H743 =
     [ "-DSTM32H743"
+    , "-DSTM32H7"
     , "-mcpu=cortex-m7"
     ]
 mcuFlags STM32G070 =
     [ "-DSTM32G070"
+    , "-DSTM32G0"
     , "-mcpu=cortex-m0plus" -- .small-multiply"
     ]
 mcuFlags STM32G431 =
     [ "-DSTM32G431"
+    , "-DSTM32G4"
     , "-mcpu=cortex-m4"
     , "-mfloat-abi=hard"
     , "-mfpu=fpv4-sp-d16"
