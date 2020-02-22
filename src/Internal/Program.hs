@@ -123,3 +123,21 @@ programmer (Just b) _ _ = error $ "don't know how to program board: " ++ show b
 avrdudeConf :: FilePath
 avrdudeConf = "c:/Program Files (x86)/Arduino/hardware/tools/avr/etc/avrdude.conf"
 
+reset :: Maybe Board -> MCU -> Action Tool
+reset Nothing mcu
+    | mcu `elem`
+        [ STM32F051
+        , STM32F072
+        , STM32F103
+        , STM32F411
+        , STM32F412
+        , STM32F767
+        , STM32H743
+        , STM32G070
+        , STM32G431
+        ]
+    = return ("STM32_Programmer_CLI", \_ ->
+        [ "--connect port=SWD mode=UR"
+        , "-hardRst"
+        ])
+    | otherwise = error "don't know how to reset this mcu"

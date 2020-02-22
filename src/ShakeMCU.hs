@@ -105,11 +105,18 @@ main = do
         (command, flags) <- programmer board mcu payload
         cmd command (flags [])
 
+    phony "reset" $ do
+        mcu <- getMCU
+        board <- getBoard
+        (command, flags) <- reset board mcu
+        cmd command (flags [])
+
     phony "ports" $ liftIO $ usbSerials Nothing Nothing >>= mapM_ print
 
     phony "clean" $ do
         putNormal $ "Cleaning files in " ++ buildDir
         removeFilesAfter buildDir [ "//*" ]
+
   else
     putStrLn $ "no " <> configFile <> " present, bailing out..."
 
