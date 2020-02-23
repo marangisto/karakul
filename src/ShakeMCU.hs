@@ -84,10 +84,9 @@ main = do
             let include = [ "-I" <> baseDir </> lib </> "include" | lib <- libs ] ++ [ "-I." ]
                 define = [ "-D" <> def | def <- defs ]
             () <- cmd command (flags [])
-                [ "-c", "-g", "-Werror", "-Wall", "-Os" ] include define
+                [ "-c", "-Werror", "-Wall", "-Os" ] include define
                 ("-DF_CPU=" ++ show (round freq) ++ "L")
                 [ src ] "-o" [ out ] "-MMD -MF" [ m ]
-                ("-Wa,-adhln=" ++ out -<.> "s")
             needMakefileDependencies m
 
     buildDir <//> "*.c.o" %> compile cc
